@@ -24,7 +24,10 @@ ParaWorld adalah aplikasi berbasis web yang menghadirkan informasi seputar Paral
 | **Comment** | User terautentikasi dapat membuat, mengedit, dan menghapus komentar sendiri. Admin dapat menghapus komentar orang lain. | Ilham Shahputra Hasim | C,R,U,D (sesuai role) |
 | **Event & Jadwal** | Admin mengelola event global. User terautentikasi dapat menambahkan dan mengelola event pribadi. | Ahmad Anggara Bayuadji Prawirosoenoto | C,R,U,D (sesuai role) |
 | **Profile Atlet** | Menampilkan profil atlet Paralympic. Guest hanya melihat daftar singkat, Member dapat melihat detail dan melaporkan data, Admin mengelola seluruh profil. | Nicholas Vesakha | C,R,U,D (Admin), R (Member), R (Guest) |
-| **Following** | User dapat mengikuti cabang olahraga untuk update berita/event. | Angelo Benhanan Abinaya Fuun | C,R,U,D (sesuai role) |
+| **Following** | User dapat mengikuti cabang olahraga untuk update berita/event. | Angelo Benhanan Abinaya Fuun | C: User bisa create following pada suatu cabang olahraga)
+R: User bisa melihat cabang olahraga apa saja yang ia follow
+U: User bisa mengatur priority followingnya (mengatur berita/event apa yang diprioritaskan untuk ditunjukkan)
+D: User bisa unfollow suatu cabang olahraga.|
 
 ---
 
@@ -61,4 +64,5 @@ ParaWorld adalah aplikasi berbasis web yang menghadirkan informasi seputar Paral
 
 - **Deployment PWS**: [Link Deployment](#)  
 - **Link Desain**: [Link Desain](#)  
+
 
