@@ -60,7 +60,7 @@ ParaWorld adalah aplikasi berbasis web yang menghadirkan informasi seputar Paral
 ## 🌐 Tautan Deployment & Desain
 
 - **Deployment PWS**: [Link Deployment](#)  
-- **Link Desain**: [Link Desain](#)  
+- **Link Desain**: https://www.figma.com/design/yqei3c8chnYDVT8bl7F4dD/Design-Web-A1?node-id=28-3&t=T5QoflADc6s3ku5s-1 
 
 
 
