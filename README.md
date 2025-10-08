@@ -23,7 +23,7 @@ ParaWorld adalah aplikasi berbasis web yang menghadirkan informasi seputar Paral
 | **Berita** | Admin dapat membuat, mengedit, dan menghapus berita. User dapat membaca & memberi komentar. | Delila Isrina Aroyo | Admin: C,R,U,D; User: R,C |
 | **Comment** | User terautentikasi dapat membuat, mengedit, dan menghapus komentar sendiri. Admin dapat menghapus komentar orang lain. | Ilham Shahputra Hasim | C,R,U,D (sesuai role) |
 | **Event & Jadwal** | Admin mengelola event global. User terautentikasi dapat menambahkan dan mengelola event pribadi. | Ahmad Anggara Bayuadji Prawirosoenoto | C,R,U,D (sesuai role) |
-| **Profile Atlet** | Menampilkan profil atlet Paralympic. Guest hanya melihat daftar singkat, Member dapat melihat detail dan melaporkan data, Admin mengelola seluruh profil. | Nicholas Vesakha | C,R,U,D (Admin), R (Member), R (Guest) |
+| **Profil Atlet** | Modul Profil Atlet berfungsi sebagai ensiklopedia digital mengenai para atlet Paralimpiade. Database-nya diisi secara efisien melalui impor data massal dari file CSV (dataset Kaggle) untuk memastikan kelengkapan data. Modul ini menerapkan sistem hak akses berjenjang yang membedakan konten berdasarkan status login pengguna: 👤 Guest (Pengunjung Biasa), yaitu pengguna yang tidak login sama sekali. Mereka hanya bisa membaca (Read) daftar nama atlet (name), negara asal (country), dan cabang olahraga (discipline) secara umum. Mereka tidak bisa melihat detail lengkap, membuat, mengedit, atau menghapus profil. 👤✅ Member (Pengguna Terautentikasi), yaitu pengguna yang sudah mendaftar dan login. Hak akses mereka meningkat menjadi bisa membaca (Read) profil atlet secara lengkap dan mendetail, seperti gender, birth_date, birth_place, birth_country, nationality, bahkan medal_type (Emas, Perak, Perunggu), event (Contoh: Men's 100m Freestyle S5), medal_date (Tahun atau tanggal medali diraih). Namun, mereka tetap tidak bisa membuat profil baru, mengedit data, atau menghapusnya. 👑 Admin (Administrator), yaitu pengelola situs dengan hak akses tertinggi. Admin memiliki kontrol penuh. Mereka bisa Membuat (Create) profil atlet baru, Membaca (Read) semua data tanpa batasan, Mengedit (Update) semua informasi profil termasuk status visibilitas, dan Menghapus (Delete) profil dari database. Fitur visibilitas diatur agar admin dapat menyembunyikan sementara profil atlet dari publik, misalnya saat datanya belum lengkap atau perlu diverifikasi, tanpa harus menghapusnya secara permanen. | Nicholas Vesakha | 👤 Guest: R (Read-Only, Terbatas), 👤✅ Member: R (Read-Only, Penuh), 👑 Admin (Administrator): CRUD: C-R-U-D (Penuh) |
 | **Following** | User dapat mengikuti cabang olahraga untuk update berita/event. | Angelo Benhanan Abinaya Fuun | <ul><li>C: User bisa create following pada suatu cabang olahraga)<li>R: User bisa melihat cabang olahraga apa saja yang ia follow<li>U: User bisa mengatur priority followingnya (mengatur berita/event apa yang diprioritaskan untuk ditunjukkan)<li>D: User bisa unfollow suatu cabang olahraga.|
 
 ---
@@ -61,6 +61,7 @@ ParaWorld adalah aplikasi berbasis web yang menghadirkan informasi seputar Paral
 
 - **Deployment PWS**: [Link Deployment](#)  
 - **Link Desain**: [Link Desain](#)  
+
 
 
 
