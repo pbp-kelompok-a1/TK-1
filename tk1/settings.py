@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'profil_atlet',
+    'following',
+    'event'
 ]
 
 MIDDLEWARE = [

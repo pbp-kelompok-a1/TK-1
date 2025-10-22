@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
-from models import Following
+from .models import Following
 from event.models import Event
 
 # Create your views here.
