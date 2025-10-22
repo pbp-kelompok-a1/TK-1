@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Atlet
 from .forms import AtletForm # import form 
+from django.db.models import Count, Q
 
 # fungsi cek Admin 
 # utk jadi Admin harus dipastikan punya status 'is_superuser' 
@@ -13,11 +14,22 @@ def is_admin(user):
 
 # R (Read) utk List Atlet
 def list_atlet(request):
+    # buat field baru 'medal_count'
+    base_query = Atlet.objects.annotate(
+        # count medali emas
+        gold_count=Count('medali', filter=Q(medali__medal_type='Gold Medal')),
+        # count medali perak
+        silver_count=Count('medali', filter=Q(medali__medal_type='Silver Medal')),
+        # count medali perunggu
+        bronze_count=Count('medali', filter=Q(medali__medal_type='Bronze Medal')),
+        # count total untuk cek (jika total = 0, kita hide)
+        total_medals=Count('medali')
+    )
     # Admin bisa lihat semua, Guest & Member hanya lihat yg 'is_visible=True'
     if request.user.is_authenticated and request.user.is_superuser:
-        atlet_list = Atlet.objects.all().order_by('name') # Admin lihat semua
+        atlet_list = base_query.order_by('name') # Admin lihat semua
     else:
-        atlet_list = Atlet.objects.filter(is_visible=True).order_by('name') # lainnya lihat yg visible
+        atlet_list = base_query.filter(is_visible=True).order_by('name') # lainnya lihat yg visible
         
     context = {'atlet_list': atlet_list}
     return render(request, 'profil_atlet/list_atlet.html', context)
