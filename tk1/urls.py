@@ -21,5 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('following/', include('following.urls')), # abhi
     path('atlet/', include('profil_atlet.urls')),  # nicho
-    # path('', include('main.urls')), 
+    path('', include('main.urls')), 
 ]

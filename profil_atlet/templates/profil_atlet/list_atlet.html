@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
+
+{% include 'navbar.html' %}
+
+<main class="container mx-auto px-4 py-8">
 
 <div class="mb-10 p-8 bg-paraworld-blue rounded-xl text-white shadow-xl bg-gradient-to-r from-paraworld-blue to-blue-400">
     <h1 class="text-4xl font-bold mb-2">Galeri Atlet</h1>
@@ -101,4 +105,4 @@
         <p class="text-gray-700">Belum ada data atlet.</p>
     {% endfor %}
 </div>
-{% endblock %}
+</main> {% endblock %}
