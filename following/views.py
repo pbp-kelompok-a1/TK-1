@@ -11,9 +11,9 @@ from event.models import Event
 def compare(userLoggedIn, item1, item2):
     if (userLoggedIn != None):
         following = Following.objects.all()
-        if (following.user == item1.user and following.user != item2.user):
+        if (following.cabangOlahraga == item1.cabangOlahraga and following.cabangOlahraga != item2.cabangOlahraga):
             return -1
-        elif (following.user == item2.user and following.user != item1.user):
+        elif (following.cabangOlahraga == item2.cabangOlahraga and following.cabangOlahraga != item1.cabangOlahraga):
             return 1
         else:
             if (item1.date > item2.date): 
@@ -30,11 +30,9 @@ def getListOfEvents(events):
     sorted(events, key=compare)
     return events
 
-# @api_view(['GET'])
-# def getListOfNews(request):
-#     news = News.objects.all()
+# def getListOfNews(news):
 #     sorted(news, key=compare)
-#     return Response({'news': news}, status=status.HTTP_200_OK)
+#     return news
 
 @api_view(['POST'])
 def createFollowing(request):
