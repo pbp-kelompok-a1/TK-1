@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     'main',
     'profil_atlet',
     'following',
-    'event'
+    'event',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
