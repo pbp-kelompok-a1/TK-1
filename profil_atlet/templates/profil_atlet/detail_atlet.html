@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <a href="{% url 'profil_atlet:list_atlet' %}">&larr; Kembali ke Daftar Atlet</a>
+    
+    <h1 class="mt-4">{{ atlet.name }}</h1>
+    <p class="lead">({{ atlet.discipline }} | {{ atlet.country }})</p>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Informasi Atlet (Hanya Member & Admin)</h3>
+            <ul class="list-group">
+                <li class="list-group-item"><b>Kebangsaan:</b> {{ atlet.nationality|default:"-" }}</li>
+                <li class="list-group-item"><b>Gender:</b> {{ atlet.gender|default:"-" }}</li>
+                <li class="list-group-item"><b>Tanggal Lahir:</b> {{ atlet.birth_date|date:"d F Y"|default:"-" }}</li>
+                <li class="list-group-item"><b>Tempat Lahir:</b> {{ atlet.birth_place|default:"-" }}</li>
+                <li class="list-group-item"><b>Negara Kelahiran:</b> {{ atlet.birth_country|default:"-" }}</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3>Riwayat Medali</h3>
+            <ul class="list-group">
+                {% for medali in medali_list %}
+                    <li class="list-group-item">
+                        <strong>{{ medali.medal_type }}</strong> - ({{ medali.medal_date }})
+                        <br><small>{{ medali.event }}</small>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item">Belum ada riwayat medali.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

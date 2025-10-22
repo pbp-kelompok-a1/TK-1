@@ -1,0 +1,43 @@
+{% extends 'base.html' %} {% block content %}
+<div class="container">
+    <h1>Daftar Atlet Paralimpiade</h1>
+    
+    {% if user.is_authenticated and user.is_superuser %}
+        <a href="{% url 'profil_atlet:create_atlet' %}" class="btn btn-primary mb-3">
+            + Tambah Profil Atlet Baru
+        </a>
+    {% endif %}
+
+    <div class="row">
+        {% for atlet in atlet_list %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ atlet.name }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ atlet.discipline }}</h6>
+                    <p class="card-text">Negara: {{ atlet.country }}</p>
+
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'profil_atlet:detail_atlet' atlet.pk %}" class="btn btn-info btn-sm">
+                            Lihat Detail Lengkap
+                        </a>
+                    {% else %}
+                        <small class="text-muted">Login untuk melihat detail lengkap.</small>
+                    {% endif %}
+                    
+                    {% if user.is_authenticated and user.is_superuser %}
+                        <hr>
+                        <small>Admin Panel:</small><br>
+                        (Status: {% if atlet.is_visible %}Visible{% else %}Hidden{% endif %})
+                        <a href="{% url 'profil_atlet:update_atlet' atlet.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="{% url 'profil_atlet:delete_atlet' atlet.pk %}" class="btn btn-danger btn-sm">Hapus</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+            <p>Belum ada data atlet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
