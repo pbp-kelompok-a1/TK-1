@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="max-w-4xl mx-auto">
+
+    <!-- TITLE -->
+    <h1 class="text-3xl font-bold mb-3 leading-tight">
+        {{ b.title }}
+    </h1>
+
+    <!-- META -->
+    <p class="text-gray-600 mb-6 text-sm">
+        {{ b.date|date:"d M Y" }} · by {{ b.author.username }} · {{ b.get_category_display }}
+    </p>
+
+    <!-- THUMBNAIL -->
+    {% if b.thumbnail %}
+        <img src="{{ b.thumbnail }}"
+            class="w-full max-h-96 object-cover rounded mb-8 shadow">
+    {% else %}
+        <div class="w-full h-64 bg-gray-300 rounded mb-8"></div>
+    {% endif %}
+
+
+    <!-- CONTENT -->
+    <div class="prose max-w-none">
+        {{ b.content|linebreaks }}
+    </div>
+
+    <!-- OWNER EDIT/DELETE -->
+    {% if request.user == b.author %}
+        <div class="mt-6 flex gap-3">
+            <a href="{% url 'berita_edit' b.id %}" class="px-4 py-2 bg-yellow-500 text-white rounded">Edit</a>
+            <a href="{% url 'berita_delete' b.id %}" class="px-4 py-2 bg-red-600 text-white rounded">Delete</a>
+        </div>
+    {% endif %}
+
+    <hr class="my-10">
+
+    <!-- COMMENTS SECTION -->
+    <h2 class="text-xl font-semibold mb-4">Comments</h2>
+
+    {% if comments %}
+        {% for c in comments %}
+            <div class="mb-6 border-b pb-4">
+                <p class="font-semibold">{{ c.user.username }}
+                    <span class="text-sm text-gray-500">{{ c.created_at|date:"d M Y H:i" }}</span>
+                </p>
+                <p class="mt-1">{{ c.text }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="text-gray-500">No comments yet.</p>
+    {% endif %}
+
+</div>
+
+{% endblock %}
