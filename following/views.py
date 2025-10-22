@@ -18,13 +18,17 @@ def compare(userLoggedIn, item1, item2):
         else:
             if (item1.date > item2.date): 
                 return -1
-            else:
+            elif (item1.date < item2.date): 
                 return 1
+            else:
+                return 0
     else:
         if (item1.date > item2.date): 
             return -1
-        else:
+        elif (item1.date < item2.date): 
             return 1
+        else:
+            return 0
     
 def getListOfEvents(events):
     sorted(events, key=compare)
