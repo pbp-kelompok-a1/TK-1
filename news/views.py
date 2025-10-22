@@ -8,7 +8,7 @@ from django.contrib.auth import login
 
 def berita_list(request):
     if not request.user.is_authenticated:
-        return redirect('/accounts/login/')   # <-- langsung lempar ke login
+        return redirect('/login/')   # <-- langsung lempar ke login
 
     berita = Berita.objects.all().order_by('-id')
     return render(request, 'news/berita_list.html', {'berita': berita})
@@ -38,7 +38,7 @@ def berita_create(request):
 def berita_edit(request, pk):
     item = get_object_or_404(Berita, pk=pk)
 
-    if request.user != item.author:
+    if request.user != item.author and not request.user.is_superuser:
         return HttpResponseForbidden("Not allowed.")
 
     # Lanjut ke normal logic edit
@@ -55,7 +55,7 @@ def berita_edit(request, pk):
 def berita_delete(request, pk):
     item = get_object_or_404(Berita, pk=pk)
 
-    if request.user != item.author:
+    if request.user != item.author and not request.user.is_superuser:
         return HttpResponseForbidden("Not allowed.")
 
     item.delete()
