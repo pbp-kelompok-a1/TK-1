@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'following',
     'event',
     'rest_framework',
+    'news',
 ]
 
 MIDDLEWARE = [
