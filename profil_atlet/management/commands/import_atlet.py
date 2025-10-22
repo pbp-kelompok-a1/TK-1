@@ -15,13 +15,13 @@ class Command(BaseCommand):
         athletes_file_path = options['athletes_csv']
         medals_file_path = options['medals_csv']
         
-        # hapus data lama
+        # hapus data  lama
         self.stdout.write(self.style.WARNING('Membersihkan database lama...'))
         Medali.objects.all().delete()
         Atlet.objects.all().delete()
         self.stdout.write(self.style.SUCCESS('Database bersih.'))
 
-        # BUAT SEMACAM 'DAFTAR BELANAJA' UTK 110 ATLET YG PNY MEDALI
+        # BUAT SEMACAM 'DAFTAR BELANAJA' UTK 110 ATLET YG PNY MEDALI (>100 data)
         self.stdout.write(f'Membaca {medals_file_path} untuk mengambil 110 atlet unik...')
         
         # pakai set() agar namanya unik (tidak duplikat)
@@ -39,7 +39,7 @@ class Command(BaseCommand):
         
         self.stdout.write(self.style.SUCCESS(f'Berhasil mendapatkan {len(atlet_sample_short_names)} atlet unik (sampel).'))
 
-        # IMPORT PROFIL ATLET HANYA UNTUK 110 NAMA TSB 
+        # IMPORT PROFIL ATLET HANYA UTK 110 NAMA TSB 
         self.stdout.write(f'Mencari dan mengimpor profil 110 atlet dari {athletes_file_path}...')
         
         with open(athletes_file_path, 'r', encoding='utf-8') as file:
@@ -59,7 +59,7 @@ class Command(BaseCommand):
                             birth_date=tgl_lahir,
                             birth_place=row.get('birth_place') or None,
                             birth_country=row.get('birth_country') or None,
-                            nationality=row['country'], # isi nationality dari country
+                            nationality=row['country'], # isi nationality dari country jadi nationality = country
                             is_visible=True,
                         )
                     except IntegrityError:
@@ -89,8 +89,9 @@ class Command(BaseCommand):
                             event=row['event'],
                             medal_date=tanggal_medali
                         )
+                    # exepction
                     except Atlet.DoesNotExist:
-                        # harusnya ini tidak terjadi, tapi untuk jaga-jaga
+                        # mungkin ini tidak terjadi, tapi untuk jaga-jaga
                         self.stdout.write(self.style.WARNING(f"Atlet '{atlet_short_name}' tidak ditemukan. Medali di-skip."))
                     except Exception as e:
                         self.stdout.write(self.style.ERROR(f"Error memproses medali untuk {row['athlete_name']}: {e}"))

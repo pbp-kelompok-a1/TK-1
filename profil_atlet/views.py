@@ -9,9 +9,9 @@ from .forms import AtletForm # import form
 def is_admin(user):
     return user.is_superuser
 
-# --- Bagian READ (Guest, Member, Admin) ---
+# Bagian READ (Guest, Member, Admin)
 
-# R (Read) - List Atlet
+# R (Read) utk List Atlet
 def list_atlet(request):
     # Admin bisa lihat semua, Guest & Member hanya lihat yg 'is_visible=True'
     if request.user.is_authenticated and request.user.is_superuser:
@@ -22,12 +22,12 @@ def list_atlet(request):
     context = {'atlet_list': atlet_list}
     return render(request, 'profil_atlet/list_atlet.html', context)
 
-# R (Read) - Detail Atlet
-@login_required # hanya bisa diakses oleh yg LOGIN (Member) & Admin
+# R (Read) utk Detail Atlet
+@login_required # decorator hanya bisa diakses oleh yg LOGIN (Member) & Admin
 def detail_atlet(request, pk):
     atlet = get_object_or_404(Atlet, pk=pk)
     
-    # JIKA user BUKAN admin DAN atletnya di-set 'is_visible=False'
+    # JIKA user BUKAN admin DAN atletnya diset 'is_visible=False'
     # penjaga agar hanya Admin yang bisa melihat profil atlet yang sedang disembunyikan. 
     # jika seorang Member (bukan admin) mencoba mengakses URL detail atlet yang disembunyikan, 
     # mereka akan ditolak dan dikembalikan ke halaman daftar.
@@ -43,9 +43,9 @@ def detail_atlet(request, pk):
     }
     return render(request, 'profil_atlet/detail_atlet.html', context)
 
-# --- Bagian C-U-D (Hanya Admin) ---
+# Bagian C-U-D (Hanya Admin)
 
-# C (Create) - only Admin
+# C (Create) only Admin
 @user_passes_test(is_admin) # decorator yang memanggil fungsi is_admin
 def create_atlet(request):
     if request.method == 'POST':
@@ -59,7 +59,7 @@ def create_atlet(request):
     context = {'form': form, 'page_title': 'Tambah Atlet Baru'}
     return render(request, 'profil_atlet/form_atlet.html', context)
 
-# U (Update) - only Admin
+# U (Update) only Admin
 @user_passes_test(is_admin)
 def update_atlet(request, pk):
     atlet = get_object_or_404(Atlet, pk=pk)
@@ -74,7 +74,7 @@ def update_atlet(request, pk):
     context = {'form': form, 'page_title': 'Edit Atlet'}
     return render(request, 'profil_atlet/form_atlet.html', context)
 
-# D (Delete) - only Admin
+# D (Delete) only Admin
 @user_passes_test(is_admin)
 def delete_atlet(request, pk):
     atlet = get_object_or_404(Atlet, pk=pk)
