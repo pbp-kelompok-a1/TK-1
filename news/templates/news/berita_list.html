@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if request.user.is_staff %}
+    <div class="mb-6">
+        <a href="{% url 'berita_add' %}" 
+           class="px-4 py-2 bg-blue-400 text-white rounded-lg shadow hover:bg-blue-500">
+           + Create News
+        </a>
+    </div>
+{% endif %}
+
+<!-- HERO CARD = berita terbaru -->
+{% if berita %}
+{% with latest=berita.first %}
+<a href="{% url 'berita_detail' latest.id %}" class="block w-full mb-10">
+  <div class="grid grid-cols-2 gap-4 bg-gray-200 rounded-xl overflow-hidden shadow-lg">
+
+    <!-- Thumbnail -->
+    {% if latest.thumbnail %}
+        <img src="{{ latest.thumbnail }}" class="w-full h-60 object-cover">
+    {% else %}
+        <div class="w-full h-60 bg-gray-300"></div>
+    {% endif %}
+
+    <!-- Title -->
+    <div class="p-6 flex items-center">
+        <h2 class="text-2xl font-semibold line-clamp-2">
+            {{ latest.title }}
+        </h2>
+    </div>
+
+  </div>
+</a>
+{% endwith %}
+{% endif %}
+
+<!-- GRID CARD NEWS (except latest) -->
+<div class="grid grid-cols-4 gap-6">
+  {% for b in berita|slice:"1:" %}
+  <a href="{% url 'berita_detail' b.id %}" class="block bg-gray-200 rounded-xl p-4 shadow-md hover:scale-[1.01] transition">
+
+    <!-- Thumbnail -->
+    {% if b.thumbnail %}
+        <img src="{{ b.thumbnail }}" class="w-full h-32 object-cover rounded mb-2">
+    {% else %}
+        <div class="w-full h-32 bg-gray-300 rounded mb-2"></div>
+    {% endif %}
+
+    <!-- Category -->
+    <span class="text-xs bg-blue-200 px-2 py-1 rounded"> {{ b.get_category_display }} </span>
+
+    <!-- Title -->
+    <h3 class="mt-2 font-medium text-sm line-clamp-3">
+        {{ b.title }}
+    </h3>
+
+  </a>
+  {% endfor %}
+</div>
+
+{% endblock %}
