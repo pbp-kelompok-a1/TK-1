@@ -26,7 +26,7 @@ class Atlet(models.Model):
         return self.name
 
 class Medali(models.Model):
-    #relasi ke atlet (parentnya)
+    # relasi ke atlet (parentnya)
     atlet = models.ForeignKey(Atlet, on_delete=models.CASCADE, related_name='medali')
     
     # detail medali 
