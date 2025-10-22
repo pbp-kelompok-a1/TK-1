@@ -9,7 +9,6 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 import datetime
 
-
 def register(request):
     form = UserCreationForm()
 
@@ -50,4 +49,3 @@ def show_main(request):
         'last_login': request.COOKIES.get('last_login', 'Never')
     }
     return render(request, "main.html", context)
-
