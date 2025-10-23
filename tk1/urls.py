@@ -22,5 +22,6 @@ urlpatterns = [
     path('following/', include('following.urls')), # abhi
     path('atlet/', include('profil_atlet.urls')),  # nicho
     path('events/', include('event.urls')),       # bayu
-    # path('', include('main.urls')), 
+    path('', include('main.urls')), 
+    path('berita/', include('news.urls')),
 ]

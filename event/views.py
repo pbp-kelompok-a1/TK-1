@@ -3,8 +3,11 @@ from django.utils import timezone
 from django.contrib import messages
 from django.forms import ModelForm
 from django.contrib.auth.decorators import login_required
+
 from .models import Event, EventType 
 from .forms import EventForm
+
+from following.views import getListOfEvents
 
 # Create your views here.
 def event_list(request):
@@ -12,8 +15,9 @@ def event_list(request):
     upcoming_events = Event.objects.filter(
         start_time__gte=timezone.now()
     ).select_related('creator') 
-    
 
+    upcoming_events = getListOfEvents(upcoming_events)
+    
     user_is_logged_in = request.user.is_authenticated
     is_admin = request.user.is_staff
     

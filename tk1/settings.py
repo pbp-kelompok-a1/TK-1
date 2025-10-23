@@ -32,6 +32,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "angelo-benhanan-paraworld.pbp.cs.ui.ac.id"]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://angelo-benhanan-paraworld.pbp.cs.ui.ac.id"
+]
 
 # Application definition
 
@@ -45,6 +48,10 @@ INSTALLED_APPS = [
     'main',
     'profil_atlet',
     'event',
+    'following',
+    'event',
+    'rest_framework',
+    'news',
 ]
 
 MIDDLEWARE = [
@@ -105,6 +112,8 @@ else:
         }
     }
 
+# mengarahkan @login_required ke halaman login di app 'main'
+LOGIN_URL = 'login'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -141,6 +150,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+if DEBUG:
+    STATICFILES_DIRS = [
+        BASE_DIR / 'static' # merujuk ke /static root project pada mode development
+    ]
+else:
+    STATIC_ROOT = BASE_DIR / 'static' # merujuk ke /static root project pada mode production
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
