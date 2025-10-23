@@ -1,10 +1,11 @@
 from django.db.models import Exists, OuterRef
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from rest_framework.response import Response
 from rest_framework import status
 
-from .models import Following
+from .models import Following, CabangOlahraga
+from .forms import FollowingForm, OlahragaForm
 from main.models import CustomUser
 from event.models import Event
 from news.models import Berita
@@ -21,8 +22,18 @@ def getListOfNews(user):
 @login_required(login_url='/login')
 def profilePage(request):
     if (request.method == "POST"):
-        return render(request, "profilePage.html", {"profilePicture": profilePicture, "name": name, "username": username})
+        form = FollowingForm(request.POST)
+        if (form.is_valid()):
+            follow = form.save(commit=False)
+            follow.user = request.user
+            follow.save()
+            return redirect('following:profile')
     else :
+        form = FollowingForm()
+
+        already_chosen = Following.objects.filter(user=request.user).values_list('cabangOlahraga', flat=True)
+        form.fields['cabangOlahraga'].queryset = CabangOlahraga.objects.exclude(id__in=already_chosen)
+
         currentUser = CustomUser.objects.filter(user = request.user)
         profilePicture = currentUser.picture
         name = currentUser.name
@@ -30,4 +41,4 @@ def profilePage(request):
 
         following = Following.objects.filter(user = request.user)
 
-        return render(request, "profilePage.html", {"profilePicture": profilePicture, "name": name, "username": username, "following": following})
+        return render(request, "profilePage.html", {"form": form, "profilePicture": profilePicture, "name": name, "username": username, "following": following})
