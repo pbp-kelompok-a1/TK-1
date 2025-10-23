@@ -1,66 +1,22 @@
 from django.shortcuts import render
 from django.utils import timezone
+from django.db.models import Exists, OuterRef
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
 from .models import Following
+from event.models import Event
+from news.models import Berita
 
 # Create your views here.
+def getListOfEvents(user):
+    followed_sports = Following.objects.filter(user=user, sport_type=OuterRef('cabangOlahraga'))
+    return (Event.objects.annotate(is_followed=Exists(followed_sports)).order_by('-is_followed', '-created_at'))
 
-def compareEvent(userLoggedIn, item1, item2):
-    if (userLoggedIn != None):
-        following = Following.objects.all()
-        currentDate = timezone.now()
-        if (following.cabangOlahraga == item1.cabangOlahraga and item1.created_at == currentDate and following.cabangOlahraga != item2.cabangOlahraga):
-            return -1
-        elif (following.cabangOlahraga == item2.cabangOlahraga and item2.created_at == currentDate and following.cabangOlahraga != item1.cabangOlahraga):
-            return 1
-        else:
-            if (item1.date > item2.date): 
-                return -1
-            elif (item1.date < item2.date): 
-                return 1
-            else:
-                return 0
-    else:
-        if (item1.date > item2.date): 
-            return -1
-        elif (item1.date < item2.date): 
-            return 1
-        else:
-            return 0
-        
-def compareNews(userLoggedIn, item1, item2):
-    if (userLoggedIn != None):
-        following = Following.objects.all()
-        currentDate = timezone.now()
-        if (following.cabangOlahraga == item1.cabangOlahraga and item1.date == currentDate and following.cabangOlahraga != item2.cabangOlahraga):
-            return -1
-        elif (following.cabangOlahraga == item2.cabangOlahraga and item2.date == currentDate and following.cabangOlahraga != item1.cabangOlahraga):
-            return 1
-        else:
-            if (item1.date > item2.date): 
-                return -1
-            elif (item1.date < item2.date): 
-                return 1
-            else:
-                return 0
-    else:
-        if (item1.date > item2.date): 
-            return -1
-        elif (item1.date < item2.date): 
-            return 1
-        else:
-            return 0
-    
-def getListOfEvents(events):
-    sorted(events, key=compareEvent)
-    return events
-
-def getListOfNews(news):
-    sorted(news, key=compareNews)
-    return news
+def getListOfNews(user):
+    followed_sports = Following.objects.filter(user=user, sport_type=OuterRef('cabangOlahraga'))
+    return (Berita.objects.annotate(is_followed=Exists(followed_sports)).order_by('-is_followed', '-date'))
 
 @api_view(['POST'])
 def createFollowing(request):

@@ -3,6 +3,8 @@ from django.conf import settings
 from django.utils import timezone
 import uuid
 
+from following.models import CabangOlahraga
+
 User = settings.AUTH_USER_MODEL
 
 class EventType(models.TextChoices):
@@ -67,6 +69,8 @@ class Event(models.Model):
         related_name='created_events',
         verbose_name="Creator"
     )
+
+    cabangOlahraga = models.ForeignKey(CabangOlahraga, default=None, on_delete=models.CASCADE, null=True)
     
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
