@@ -7,15 +7,19 @@ from django.contrib.auth.decorators import login_required
 from .models import Event, EventType 
 from .forms import EventForm
 
+from following.views import getListOfEvents
 
 # Create your views here.
 def event_list(request):
-    upcoming_events = Event.objects.filter(
-        start_time__gte=timezone.now()
-    ).select_related('creator').order_by('start_time')
-    
     user_is_logged_in = request.user.is_authenticated
     is_admin = request.user.is_staff
+
+    upcoming_events = Event.filter(start_time__gte=timezone.now()).select_related('creator').order_by('start_time')
+    if user_is_logged_in:
+        try:
+            upcoming_events = getListOfEvents(request.user).filter(start_time__gte=timezone.now())
+        except:
+            upcoming_events = upcoming_events
     
     context = {
         'events': upcoming_events,
