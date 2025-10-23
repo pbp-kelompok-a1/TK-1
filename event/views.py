@@ -3,8 +3,8 @@ from django.utils import timezone
 from django.contrib import messages
 from django.forms import ModelForm
 from django.contrib.auth.decorators import login_required
-from main.models import Event, EventType 
-from main.forms import EventForm
+from .models import Event, EventType 
+from .forms import EventForm
 
 # Create your views here.
 def event_list(request):

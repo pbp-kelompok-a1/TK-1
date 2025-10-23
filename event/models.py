@@ -7,14 +7,6 @@ from django.utils import timezone
 import uuid
 
 # Create your models here.
-class CabangOlahraga(models.Model):
-    id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
-    name = models.CharField(max_length=255, default="", editable=False)
-
-class Following(models.Model):
-    id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
-    priority = models.IntegerField(editable=True)
-
 class EventType(models.TextChoices):
     GLOBAL = 'global', 'Global Tournament (Admin Only)'     # hanya bisa diupload oleh admin
     COMMUNITY = 'community', 'Community Tournament'         # bisa diupload oleh logged in user
