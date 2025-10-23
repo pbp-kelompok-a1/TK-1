@@ -1,9 +1,8 @@
-# file profil_atlet/models.py utk model
 from django.db import models
 
 class Atlet(models.Model):
     # key unik untuk matching dengan file medali
-    short_name = models.CharField(max_length=100, unique=True, db_index=True)
+    short_name = models.CharField(max_length=100, unique=True, db_index=True, blank=True, null=True)
     
     # data untuk Guest
     name = models.CharField(max_length=255)

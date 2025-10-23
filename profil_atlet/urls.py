@@ -13,4 +13,7 @@ urlpatterns = [
     path('create/', views.create_atlet, name='create_atlet'),
     path('update/<int:pk>/', views.update_atlet, name='update_atlet'),
     path('delete/<int:pk>/', views.delete_atlet, name='delete_atlet'),
+    path('json/', views.show_json_atlet, name='show_json_atlet'),
+    path('create-ajax/', views.create_atlet_ajax, name='create_atlet_ajax'),
+    path('delete-ajax/<int:pk>/', views.delete_atlet_ajax, name='delete_atlet_ajax'),
 ]
