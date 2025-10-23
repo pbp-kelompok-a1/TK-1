@@ -9,20 +9,36 @@ User = settings.AUTH_USER_MODEL
 
 class EventType(models.TextChoices):
     GLOBAL = 'global', 'Global Tournament (Admin Only)' 
-    COMMUNITY = 'community', 'Community Tournament'      
+    COMMUNITY = 'community', 'Community Tournament'
+
+# Choices for Cabang Olahraga
+class SportBranch(models.TextChoices):
+    TENNIS = 'tennis', 'Tennis'
+    SWIMMING = 'swim', 'Swimming'
+    ATHLETICS = 'ath', 'Athletics'
+    BASKETBALL = 'basket', 'Wheelchair Basketball'
+    OTHER = 'other', 'Other'
 
 class Event(models.Model): 
-    # Primary Key UUID
+    # Primary Key
     id = models.UUIDField(
         primary_key=True, 
         default=uuid.uuid4, 
         editable=False
     ) 
     
-    # Event Details
+    # Core Event Details
     title = models.CharField(max_length=200, verbose_name="Tournament Name")
     description = models.TextField(verbose_name="Description of the Tournament")
     
+    # Sport Branch
+    sport_branch = models.CharField(
+        max_length=10,
+        choices=SportBranch.choices,
+        default=SportBranch.OTHER,
+        verbose_name="Cabang Olahraga"
+    )
+
     location = models.CharField(
         max_length=255,
         null=True,
@@ -30,14 +46,7 @@ class Event(models.Model):
         verbose_name="Location / Venue (Optional)"
     )
     
-    official_link = models.URLField(
-        max_length=200,
-        null=True,
-        blank=True,
-        verbose_name="Official Website Link (Recommended for Global Tournaments)"
-    )
-    
-    # New Fields for Visual Events
+    # Visual Fields
     picture_url = models.URLField(
         max_length=500, 
         blank=True, 
@@ -81,9 +90,8 @@ class Event(models.Model):
         ordering = ['start_time']
 
     def __str__(self):
-        return f"[{self.get_event_type_display()}] {self.title} @ {self.start_time.strftime('%Y-%m-%d %H:%M')}"
+        return f"[{self.get_event_type_display()}] {self.title} - {self.get_sport_branch_display()}"
 
     @property
     def is_global_event(self):
-        """Helper property to easily check event type in templates/views."""
         return self.event_type == EventType.GLOBAL
