@@ -16,7 +16,7 @@ def event_list(request):
         start_time__gte=timezone.now()
     ).select_related('creator') 
 
-    upcoming_events = getListOfEvents(upcoming_events)
+    # upcoming_events = getListOfEvents(upcoming_events)
     
     user_is_logged_in = request.user.is_authenticated
     is_admin = request.user.is_staff
