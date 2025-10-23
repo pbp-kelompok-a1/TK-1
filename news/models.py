@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from following.models import CabangOlahraga
+
 class Berita(models.Model):
 
     CATEGORY_CHOICES = [
@@ -15,7 +17,7 @@ class Berita(models.Model):
     content = models.TextField()
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='other')
     thumbnail = models.URLField(blank=True, null=True)
-
+    cabangOlahraga = models.ForeignKey(CabangOlahraga, on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
 
