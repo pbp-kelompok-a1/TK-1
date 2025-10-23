@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from .forms import BeritaForm
 from .models import Berita
 
@@ -19,6 +20,7 @@ def berita_detail(request, pk):
     item = get_object_or_404(Berita, pk=pk)
     return render(request, 'news/berita_detail.html', {'b': item})
 
+@login_required(login_url='/login')
 def berita_create(request):
     if request.method == "POST":
         form = BeritaForm(request.POST)
