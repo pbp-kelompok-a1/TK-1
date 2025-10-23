@@ -13,7 +13,7 @@ def berita_list(request):
         return redirect('/login/')   # <-- langsung lempar ke login
 
     berita = Berita.objects.all().order_by('-id')
-    berita = getListOfNews(berita)
+    # berita = getListOfNews(berita)
     return render(request, 'news/berita_list.html', {'berita': berita})
 
 def berita_detail(request, pk):
