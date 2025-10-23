@@ -6,11 +6,14 @@ from django.shortcuts import redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 
+from following.views import getListOfNews
+
 def berita_list(request):
     if not request.user.is_authenticated:
         return redirect('/login/')   # <-- langsung lempar ke login
 
     berita = Berita.objects.all().order_by('-id')
+    berita = getListOfNews(berita)
     return render(request, 'news/berita_list.html', {'berita': berita})
 
 def berita_detail(request, pk):
