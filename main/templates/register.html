@@ -6,18 +6,28 @@
 {% endblock meta %}
 
 {% block content %}
-<div class="bg-gray-900 flex items-center justify-center min-h-screen">
-  <div class="bg-white flex w-[800px] rounded-lg overflow-hidden shadow-lg">
+<div class="bg-gray-900 flex items-center justify-center min-h-screen p-4">
+  <div class="bg-white flex flex-col md:flex-row w-full md:w-[800px] rounded-lg overflow-hidden shadow-lg">
     
-   <!-- Left side (logo) -->
-    <div class="w-1/2 flex flex-col items-center justify-center p-8" style="background-color: #38BDF8;">
-      <img
-        src="{% static 'images\logo1.png' %}" class="w-80 h-80 object-contain mb-6 style="background: transparent;""
-      />
+    <!-- Logo for mobile (top) -->
+    <div class="md:hidden w-full flex justify-center py-6" style="background-color: #38BDF8;">
+      <a href="{% url 'main:show_main' %}" class="flex items-center space-x-2 md:space-x-3">
+        <img src="{% static 'images/logo1.png' %}" class="w-32 h-32 object-contain" alt="ParaWorld Logo"
+        />
+      </a>
+    </div>
+
+    <!-- Left side (logo) - Hidden on mobile -->
+    <div class="hidden md:flex md:w-1/2 flex-col items-center justify-center p-8" style="background-color: #38BDF8;">
+      <a href="{% url 'main:show_main' %}" class="flex items-center space-x-2 md:space-x-3">
+        <img
+          src="{% static 'images/logo1.png' %}" class="w-80 h-80 object-contain mb-6" style="background: transparent;" alt="ParaWorld Logo"
+        />
+      </a>
     </div>
 
     <!-- Right side (form) -->
-    <div class="w-1/2 flex flex-col p-10 pt-12">
+    <div class="w-full md:w-1/2 flex flex-col p-6 md:p-10 md:pt-12">
       <h2 class="text-2xl font-semibold text-gray-800 mb-1">ParaWorld</h2>
       <p class="text-xl font-medium text-gray-700 mb-2">Welcome!</p>
 

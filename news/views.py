@@ -7,9 +7,6 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 
 def berita_list(request):
-    if not request.user.is_authenticated:
-        return redirect('/login/')   # <-- langsung lempar ke login
-
     berita = Berita.objects.all().order_by('-id')
     return render(request, 'news/berita_list.html', {'berita': berita})
 
@@ -60,14 +57,3 @@ def berita_delete(request, pk):
 
     item.delete()
     return redirect('berita_list')
-
-def register(request):
-    if request.method == "POST":
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)  # auto login setelah signup
-            return redirect('berita_list')
-    else:
-        form = UserCreationForm()
-    return render(request, 'news/register.html', {'form': form})

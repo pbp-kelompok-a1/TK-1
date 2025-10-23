@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'event',
     'rest_framework',
     'news',
+    'comment',
 ]
 
 MIDDLEWARE = [
