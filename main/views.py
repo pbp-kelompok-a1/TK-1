@@ -9,13 +9,17 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 import datetime
 
+from .models import User
+
 def register(request):
     form = UserCreationForm()
 
     if request.method == "POST":
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
+            newUser = User(user=user, username=user.username, name=user.username)
+            newUser.save()
             messages.success(request, 'Your account has been successfully created!')
             return redirect('main:login')
     context = {'form':form}

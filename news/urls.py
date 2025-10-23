@@ -7,6 +7,4 @@ urlpatterns = [
     path('add/', views.berita_create, name='berita_add'),
     path('<int:pk>/edit/', views.berita_edit, name='berita_edit'),
     path('<int:pk>/delete/', views.berita_delete, name='berita_delete'),
-    path('register/', views.register, name='register'),
-
 ]
