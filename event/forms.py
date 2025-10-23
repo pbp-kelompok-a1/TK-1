@@ -9,8 +9,8 @@ class EventForm(forms.ModelForm):
             'title', 
             'description', 
             'location', 
-            'official_link', 
             'picture_url', 
+            'sport_branch',  # <--- NEW FIELD ADDED HERE
             'start_time',
             'end_time',    
         ]
