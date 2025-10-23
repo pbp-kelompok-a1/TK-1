@@ -1,23 +1,23 @@
 from django.db import models
-
-# Create your models here.
-from django.db import models
 from django.conf import settings
 from django.utils import timezone
 import uuid
 
-# Create your models here.
+User = settings.AUTH_USER_MODEL
+
 class EventType(models.TextChoices):
-    GLOBAL = 'global', 'Global Tournament (Admin Only)'     # hanya bisa diupload oleh admin
-    COMMUNITY = 'community', 'Community Tournament'         # bisa diupload oleh logged in user
+    GLOBAL = 'global', 'Global Tournament (Admin Only)' 
+    COMMUNITY = 'community', 'Community Tournament'      
 
 class Event(models.Model): 
+    # Primary Key UUID
     id = models.UUIDField(
         primary_key=True, 
         default=uuid.uuid4, 
         editable=False
     ) 
     
+    # Event Details
     title = models.CharField(max_length=200, verbose_name="Tournament Name")
     description = models.TextField(verbose_name="Description of the Tournament")
     
@@ -35,8 +35,23 @@ class Event(models.Model):
         verbose_name="Official Website Link (Recommended for Global Tournaments)"
     )
     
+    # New Fields for Visual Events
+    picture_url = models.URLField(
+        max_length=500, 
+        blank=True, 
+        null=True, 
+        verbose_name="Tournament Image URL"
+    )
+    end_time = models.DateTimeField(
+        blank=True, 
+        null=True, 
+        verbose_name="Time Ends (Optional)"
+    )
+
+    # Scheduling
     start_time = models.DateTimeField(default=timezone.now, verbose_name="Start Time")
 
+    # Event Type and Creator
     event_type = models.CharField(
         max_length=10,
         choices=EventType.choices,
@@ -45,13 +60,15 @@ class Event(models.Model):
     )
     
     creator = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        User,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
+        related_name='created_events',
         verbose_name="Creator"
     )
     
+    # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -59,11 +76,10 @@ class Event(models.Model):
         verbose_name_plural = "Tournament Events"
         ordering = ['start_time']
 
-    # string helper buat nulis tanggal
     def __str__(self):
         return f"[{self.get_event_type_display()}] {self.title} @ {self.start_time.strftime('%Y-%m-%d %H:%M')}"
 
-    # buat cek jika global turnamen atau bukan
     @property
     def is_global_event(self):
+        """Helper property to easily check event type in templates/views."""
         return self.event_type == EventType.GLOBAL
