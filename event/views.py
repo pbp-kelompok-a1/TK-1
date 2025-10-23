@@ -82,6 +82,7 @@ def event_create_global(request):
             storage = messages.get_messages(request)
             list(storage) 
 
+            return response
     else:
         form = EventForm()
 

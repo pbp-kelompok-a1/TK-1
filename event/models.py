@@ -90,7 +90,7 @@ class Event(models.Model):
         ordering = ['start_time']
 
     def __str__(self):
-        return f"[{self.get_event_type_display()}] {self.title} - {self.get_sport_branch_display()}"
+        return f"[{self.get_event_type_display()}] {self.title}"
 
     @property
     def is_global_event(self):
