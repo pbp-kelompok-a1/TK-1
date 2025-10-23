@@ -10,7 +10,7 @@ class EventForm(forms.ModelForm):
             'description', 
             'location', 
             'picture_url', 
-            'sport_branch',  # <--- NEW FIELD ADDED HERE
+            'cabangOlahraga',  # <--- NEW FIELD ADDED HERE
             'start_time',
             'end_time',    
         ]
