@@ -1,9 +1,7 @@
-
-from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
+from . import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('events/', include('events.urls')),
+    path('', views.event_list, name='event_list'),  
+    path('create/', views.event_create, name='event_create'),  
 ]
-

@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+    <!-- IMPORTANT: Include styles and scripts here if base.html doesn't handle them -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Define theme colors for easy reference and consistency */
+        .bg-primary { background-color: #4f46e5; }
+        .text-primary { color: #4f46e5; }
+        .tab-active {
+            border-bottom-width: 3px;
+            border-color: #4f46e5; /* Indigo-600 */
+            color: #4f46e5; /* Indigo-600 */
+        }
+        .card-global {
+            border-left: 5px solid #4f46e5; /* Primary Indigo */
+        }
+        .card-community {
+            border-left: 5px solid #10b981; /* Secondary Emerald */
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#4f46e5',
+                        'secondary': '#10b981',
+                        'sky-light': '#8ac5ff',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Header / Banner Section -->
+        <header class="mb-8 p-6 rounded-xl shadow-lg 
+                        bg-gradient-to-r from-primary to-sky-light text-white">
+            <h1 class="text-4xl font-extrabold tracking-tight mb-2">
+                Upcoming Sports Tournaments
+            </h1>
+            <p class="text-lg opacity-90 mb-4">
+                View major Global Events and user-submitted Community Tournaments.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                {% if user_is_logged_in %}
+                <a href="{% url 'event_create' %}" 
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-md text-white bg-secondary hover:bg-emerald-600 transition duration-150">
+                    <i data-lucide="plus-circle" class="w-5 h-5 mr-2"></i>
+                    Create Community Tournament
+                </a>
+                {% endif %}
+
+                {% if is_admin %}
+                <a href="/admin/event/event/add/" 
+                    class="inline-flex items-center px-4 py-2 border border-white text-sm font-medium rounded-lg shadow-md bg-opacity-20 hover:bg-opacity-30 transition duration-150">
+                    <i data-lucide="shield-check" class="w-5 h-5 mr-2"></i>
+                    Add Global Event (Admin)
+                </a>
+                {% endif %}
+            </div>
+        </header>
+
+        <!-- Filters Section -->
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-6 border-b border-gray-200">
+            <nav class="flex space-x-4 mb-4 sm:mb-0" role="tablist">
+                <button type="button" data-filter="all" id="all-tab"
+                        class="tab-active py-2 px-3 text-sm font-medium text-gray-900 transition duration-150 hover:text-primary focus:outline-none"
+                        onclick="filterEvents('all')">
+                    All Events
+                </button>
+                <button type="button" data-filter="global" id="global-tab"
+                        class="py-2 px-3 text-sm font-medium text-gray-500 transition duration-150 hover:text-primary focus:outline-none"
+                        onclick="filterEvents('global')">
+                    Global Events
+                </button>
+                <button type="button" data-filter="community" id="community-tab"
+                        class="py-2 px-3 text-sm font-medium text-gray-500 transition duration-150 hover:text-primary focus:outline-none"
+                        onclick="filterEvents('community')">
+                    Community Events
+                </button>
+            </nav>
+            <div class="text-sm text-gray-500">
+                Showing <span id="event-count">0</span> Tournaments
+            </div>
+        </div>
+
+        <!-- Event Grid -->
+        <div id="event-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for event in events %}
+            <div class="event-card bg-white shadow-lg rounded-xl overflow-hidden transform hover:scale-[1.02] transition duration-300 card-{{ event.event_type }}" 
+                data-type="{{ event.event_type }}">
+                
+                <div class="p-5">
+                    <!-- Event Type Tag -->
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full 
+                            {% if event.is_global_event %}
+                                bg-indigo-100 text-primary
+                            {% else %}
+                                bg-emerald-100 text-secondary
+                            {% endif %}">
+                            <i data-lucide="{% if event.is_global_event %}globe-2{% else %}users{% endif %}" class="w-3 h-3 mr-1.5"></i>
+                            {{ event.get_event_type_display }}
+                        </span>
+
+                        <span class="text-xs text-gray-400">
+                            {% if event.is_global_event %}
+                                Admin Added
+                            {% else %}
+                                By: {{ event.creator.username|default:"[Deleted User]" }}
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <h2 class="text-xl font-bold text-gray-900 mb-2 truncate" title="{{ event.title }}">
+                        {{ event.title }}
+                    </h2>
+                    
+                    <p class="text-sm text-gray-600 line-clamp-3 mb-4">
+                        {{ event.description|default:"No description provided." }}
+                    </p>
+                    
+                    <div class="space-y-2 text-sm text-gray-700">
+                        <p class="flex items-center">
+                            <i data-lucide="calendar" class="w-4 h-4 mr-2 text-primary"></i>
+                            Starts: <span class="ml-1 font-medium">{{ event.start_time|date:"M d, Y P" }}</span>
+                        </p>
+                        {% if event.location %}
+                        <p class="flex items-center">
+                            <i data-lucide="map-pin" class="w-4 h-4 mr-2 text-primary"></i>
+                            {{ event.location }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if event.official_link %}
+                <div class="p-5 pt-0">
+                    <a href="{{ event.official_link }}" target="_blank" rel="noopener noreferrer" 
+                        class="flex items-center text-sm font-semibold text-primary hover:text-indigo-700 transition duration-150">
+                        Official Website
+                        <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div id="no-events-message" class="col-span-full bg-white p-8 rounded-xl text-center shadow-lg border-2 border-dashed border-gray-300">
+                <i data-lucide="inbox" class="w-10 h-10 mx-auto text-gray-400 mb-3"></i>
+                <p class="text-lg font-medium text-gray-700">No Upcoming Tournaments Found</p>
+                <p class="text-sm text-gray-500">Check back later or try creating a Community Tournament!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- JS Logic -->
+    <script>
+        // Must be called inside the block to ensure all elements are loaded
+        lucide.createIcons();
+
+        const eventCards = document.querySelectorAll('.event-card');
+        const eventCountElement = document.getElementById('event-count');
+        const tabButtons = document.querySelectorAll('[role="tablist"] button');
+
+        function updateCount(count) {
+            eventCountElement.textContent = count;
+        }
+
+        function filterEvents(filterType) {
+            let visibleCount = 0;
+            
+            eventCards.forEach(card => {
+                const cardType = card.getAttribute('data-type');
+                if (filterType === 'all' || cardType === filterType) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            const noEventsMessage = document.getElementById('no-events-message');
+            // Show the "No Events" message only if the grid is empty after filtering
+            if (noEventsMessage) { 
+                noEventsMessage.style.display = visibleCount === 0 ? 'block' : 'none';
+            }
+            updateCount(visibleCount);
+
+            tabButtons.forEach(button => {
+                button.classList.remove('tab-active', 'text-gray-900');
+                button.classList.add('text-gray-500');
+                if (button.getAttribute('data-filter') === filterType) {
+                    button.classList.add('tab-active', 'text-gray-900');
+                    button.classList.remove('text-gray-500');
+                }
+            });
+        }
+
+        // Initialize filtering after the DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+             // Delay needed sometimes when using 'extends' and external scripts
+            setTimeout(() => filterEvents('all'), 50); 
+        });
+
+        // Initial count setup when script loads
+        updateCount(eventCards.length);
+    </script>
+
+{% endblock content %}
