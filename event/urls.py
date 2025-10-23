@@ -1,9 +1,11 @@
+from django.urls import path
+from . import views
 
-from django.contrib import admin
-from django.urls import path, include
+app_name = 'event'
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('events/', include('events.urls')),
+    path('', views.event_list, name='event_list'),
+    path('create/', views.event_create, name='event_create'),
+    path('<uuid:event_id>/delete/', views.event_delete, name='event_delete'),
+    path('create/global/', views.event_create_global, name='event_create_global'),
 ]
-

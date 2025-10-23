@@ -1,9 +1,52 @@
 {% extends 'base.html' %}
-{% block content %}
-<div class="container">
-    <h1>{{ page_title }}</h1> <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }} <button type="submit" class="btn btn-success">Simpan</button>
-    </form>
-</div>
-{% endblock %}
+{% load static %}
+{% load widget_tweaks %}{% block content %}
+{% include 'navbar.html' %} 
+
+<main class="max-w-2xl mx-auto px-4 py-8">
+    <div class="bg-white p-8 rounded-xl shadow-lg">
+
+        <h1 class="text-3xl font-bold text-paraworld-dark mb-6">{{ page_title }}</h1>
+        
+        <form id="atlet-form" method="POST">
+            {% csrf_token %}
+            
+            <div class="space-y-5">
+                {% for field in form %}
+                    {% if field.name == 'is_visible' %}
+                        <div class="flex items-center gap-3 py-2">
+                            {{ field|add_class:"h-4 w-4 rounded border-gray-300 bg-gray-50 text-paraworld-blue focus:ring-paraworld-blue" }}
+                            <label for="{{ field.id_for_label }}" class="text-sm font-medium text-gray-700">
+                                {{ field.label }}
+                            </label>
+                        </div>
+
+                    {% else %}
+                        <div>
+                            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                {{ field.label }}
+                            </label>
+                            {{ field|add_class:"mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm focus:border-paraworld-blue focus:ring-paraworld-blue" }}
+                        </div>
+                    {% endif %}
+
+                    {% if field.help_text %}
+                        <p class="mt-2 text-xs text-gray-500">{{ field.help_text }}</p>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+
+                {% endfor %}
+            </div>
+        
+            <div id="form-buttons-container" class="mt-8 pt-6 border-t flex justify-end gap-3">
+                <a href="{% url 'profil_atlet:list_atlet' %}" class="px-5 py-2 rounded-lg bg-gray-200 text-gray-800 font-semibold hover:bg-gray-300">
+                    Cancel
+                </a>
+                <button type="submit" class="px-5 py-2 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700">
+                    Save Changes
+                </button>
+            </div>
+            
+        </form> </div> </main> {% endblock content %}

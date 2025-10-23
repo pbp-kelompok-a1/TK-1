@@ -11,7 +11,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
         </svg>
-        Kembali ke Daftar Atlet
+        Back to Athlete List
     </a>
     </div>
     
@@ -23,11 +23,11 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2 bg-white rounded-xl shadow-xl overflow-hidden border-t-8 border-paraworld-blue">
             <h3 class="text-xl font-bold text-paraworld-dark p-5 bg-gray-50 border-b">
-                Informasi Atlet
+                Athlete Information
             </h3>
             <ul class="divide-y divide-gray-200">
                 <li class="px-6 py-4 flex justify-between items-center">
-                    <span class="font-semibold text-gray-600">Kebangsaan</span> 
+                    <span class="font-semibold text-gray-600">Nationality</span> 
                     <span class="text-gray-900">{{ atlet.nationality|default:"-" }}</span>
                 </li>
                 <li class="px-6 py-4 flex justify-between items-center">
@@ -35,22 +35,22 @@
                     <span class="text-gray-900">{{ atlet.gender|default:"-" }}</span>
                 </li>
                 <li class="px-6 py-4 flex justify-between items-center">
-                    <span class="font-semibold text-gray-600">Tanggal Lahir</span> 
+                    <span class="font-semibold text-gray-600">Birth Date</span> 
                     <span class="text-gray-900">{{ atlet.birth_date|date:"d F Y"|default:"-" }}</span>
                 </li>
                 <li class="px-6 py-4 flex justify-between items-center">
-                    <span class="font-semibold text-gray-600">Tempat Lahir</span> 
+                    <span class="font-semibold text-gray-600">Birth Place</span> 
                     <span class="text-gray-900">{{ atlet.birth_place|default:"-" }}</span>
                 </li>
                 <li class="px-6 py-4 flex justify-between items-center">
-                    <span class="font-semibold text-gray-600">Negara Kelahiran</span> 
+                    <span class="font-semibold text-gray-600">Birth Country</span> 
                     <span class="text-gray-900">{{ atlet.birth_country|default:"-" }}</span>
                 </li>
             </ul>
         </div>
         <div class="lg:col-span-1 bg-white rounded-xl shadow-xl overflow-hidden">
             <h3 class="text-xl font-bold text-paraworld-dark p-5 bg-gray-50 border-b">
-                Riwayat Medali
+                Medal History
             </h3>
             <ul class="divide-y divide-gray-200 max-h-96 overflow-y-auto">
                 {% for medali in medali_list %}
@@ -61,7 +61,7 @@
                         <small class="text-gray-600">{{ medali.event }}</small>
                     </li>
                 {% empty %}
-                    <li class="px-6 py-4 text-gray-500 italic">Belum ada riwayat medali.</li>
+                    <li class="px-6 py-4 text-gray-500 italic">No medal history yet.</li>
                 {% endfor %}
             </ul>
         </div>

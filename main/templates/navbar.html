@@ -2,6 +2,7 @@
 
 <nav class="bg-[#3BC3FD] flex items-center justify-between px-4 md:px-8 py-3 shadow-md relative">
   <!-- Left: Logo -->
+
   <div class="flex items-center space-x-2 md:space-x-3">
     <a href="{% url 'main:show_main' %}" class="flex items-center space-x-2 md:space-x-3">
       <img src="{% static 'images/logo2.png' %}" alt="ParaWorld Logo" class="h-12 md:h-16 w-auto" style="background: transparent;" />
@@ -61,7 +62,7 @@
     <a href="{% url 'main:show_main' %}" class="hover:text-sky-700 transition">HOME</a>
     <a href="{% url 'news:berita_list' %}" class="hover:text-sky-700 transition">NEWS</a>
     <a href="{% url 'profil_atlet:list_atlet' %}" class="hover:text-sky-700 transition">ATHLETES</a>
-    <a href="#" class="hover:text-sky-700 transition">EVENT</a>
+    <a href="{% url 'event:event_list' %}" class="hover:text-sky-700 transition">EVENT</a>
   </div>
 
   <!-- Right: Profile Icon (Desktop Only) -->

@@ -47,11 +47,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'profil_atlet',
-    'following',
     'event',
+    'following',
     'rest_framework',
     'news',
     'comment',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [

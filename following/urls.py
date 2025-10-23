@@ -2,4 +2,7 @@ from django.urls import path
 from . import views
 from .views import *
 
-urlpatterns = []
+urlpatterns = [
+    path('profile/<int:userId>', profilePage, name='profile'),
+    path('unfollow/<int:follow_id>/', unfollow, name='unfollow'),
+]
