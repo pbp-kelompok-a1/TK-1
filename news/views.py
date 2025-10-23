@@ -6,6 +6,12 @@ from following.views import getListOfNews
 
 def berita_list(request):
     berita = Berita.objects.all().order_by('-id')
+    if request.user != None:
+        try:
+            berita = getListOfNews(request.user)
+        except:
+            berita = berita
+
     # berita = getListOfNews(berita)
     return render(request, 'news/berita_list.html', {'berita': berita})
 

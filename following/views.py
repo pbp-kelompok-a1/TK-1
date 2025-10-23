@@ -11,11 +11,11 @@ from news.models import Berita
 
 # Create your views here.
 def getListOfEvents(user):
-    followed_sports = Following.objects.filter(user=user, sport_type=OuterRef('cabangOlahraga'))
+    followed_sports = Following.objects.all().filter(user=user, sport_type=OuterRef('cabangOlahraga'))
     return (Event.objects.annotate(is_followed=Exists(followed_sports)).order_by('-is_followed', '-created_at'))
 
 def getListOfNews(user):
-    followed_sports = Following.objects.filter(user=user, sport_type=OuterRef('cabangOlahraga'))
+    followed_sports = Following.objects.all().filter(user=user, sport_type=OuterRef('cabangOlahraga'))
     return (Berita.objects.annotate(is_followed=Exists(followed_sports)).order_by('-is_followed', '-date'))
 
 @api_view(['POST'])
