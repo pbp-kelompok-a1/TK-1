@@ -19,13 +19,13 @@
 
   <!-- Right: Profile Icon -->
   <div class="relative">
-    <button id="profile-btn">
+    <a id="profile-btn" href="{% url 'profile' user.id %}">
       <img
         src="{% static 'images/profile.png' %}"
         alt="Profile Icon"
         class="h-12 w-12 rounded-full bg-gray-100 object-cover border border-white"
       />
-    </button>
+    </a>
 
     <!-- Popup -->
     <div id="profile-popup"
