@@ -70,7 +70,7 @@ class Event(models.Model):
         verbose_name="Creator"
     )
 
-    cabangOlahraga = models.ForeignKey(CabangOlahraga, on_delete=models.CASCADE)
+    cabangOlahraga = models.ForeignKey(CabangOlahraga, default=None, on_delete=models.CASCADE, null=True)
     
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
