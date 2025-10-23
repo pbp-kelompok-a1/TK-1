@@ -49,9 +49,9 @@ INSTALLED_APPS = [
     'profil_atlet',
     'event',
     'following',
-    'event',
     'rest_framework',
     'news',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [
