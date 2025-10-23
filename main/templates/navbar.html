@@ -1,0 +1,60 @@
+{% load static %}
+
+<nav class="bg-[#3BC3FD] flex items-center justify-between px-8 py-3 shadow-md">
+  <!-- Left: Logo -->
+<div class="flex items-center space-x-3">
+  <a href="{% url 'main:show_main' %}" class="flex items-center space-x-3">
+    <img src="{% static 'images/logo2.png' %}" alt="ParaWorld Logo" class="h-16 w-auto" style="background: transparent;" />
+    <span class="text-[#f5f1ce] text-4xl font-semibold tracking-wide">PARAWORLD</span>
+  </a>
+</div>
+
+  <!-- Middle: Menu Links -->
+  <div class="flex space-x-10 text-black font-bold text-lg ml-auto mr-14">
+    <a href="{% url 'main:show_main' %}" class="hover:text-white transition">HOME</a>
+    <a href="#" class=" hover:text-white transition">NEWS</a>
+    <a href="{% url 'profil_atlet:list_atlet' %}" class="hover:text-white transition">ATHLETES</a>
+    <a href="#" class="hover:text-white transition">EVENT</a>
+  </div>
+
+  <!-- Right: Profile Icon -->
+  <div class="relative">
+    <button id="profile-btn">
+      <img
+        src="{% static 'images/profile.png' %}"
+        alt="Profile Icon"
+        class="h-12 w-12 rounded-full bg-gray-100 object-cover border border-white"
+      />
+    </button>
+
+    <!-- Popup -->
+    <div id="profile-popup"
+         class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+      <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Profile</a>
+      <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Settings</a>
+      <hr class="my-1">
+      <a href="{% url 'main:logout' %}" class="block px-4 py-2 text-red-600 hover:bg-gray-100">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<script>
+  // Simple toggle popup
+  document.addEventListener("DOMContentLoaded", () => {
+    const profileBtn = document.getElementById("profile-btn");
+    const popup = document.getElementById("profile-popup");
+
+    profileBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      popup.classList.toggle("hidden");
+    });
+
+    // Klik di luar popup -> popup tertutup
+    document.addEventListener("click", (e) => {
+      if (!popup.contains(e.target)) {
+        popup.classList.add("hidden");
+      }
+    });
+  });
+</script>
+
