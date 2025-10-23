@@ -1,12 +1,29 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
-<div class="container">
-    <h1>Hapus Atlet</h1>
-    <p>Apakah Anda yakin ingin menghapus <strong>{{ atlet.name }}</strong>?</p>
-    <form method="POST">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Ya, Hapus</button>
-        <a href="{% url 'profil_atlet:detail_atlet' atlet.pk %}" class="btn btn-secondary">Batal</a>
-    </form>
-</div>
-{% endblock %}
+{% include 'navbar.html' %}
+
+<main class="max-w-lg mx-auto px-4 py-8">
+    <div class="bg-white p-10 rounded-xl shadow-lg text-center">
+        <h1 class="text-3xl font-bold text-paraworld-dark mb-4">Delete Athlete</h1>
+        <p class="text-gray-600 mb-8">
+            Are you sure you want to delete? <strong>{{ atlet.name }}</strong>?
+        </p>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div class="flex justify-center gap-4">
+                <a href="{% url 'profil_atlet:list_atlet' %}" 
+                   class="px-6 py-2 rounded-lg bg-gray-200 text-gray-800 font-semibold hover:bg-gray-300">
+                   Cancel
+                </a>
+                <button type="submit" 
+                        class="px-6 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700">
+                        Yes, Delete
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+{% endblock content %}

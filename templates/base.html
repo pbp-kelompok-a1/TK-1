@@ -22,8 +22,84 @@
     
     <link rel="stylesheet" href="{% static 'css/global.css' %}"/>
   </head>
-  <body>
-    {% block content %} {% endblock content %}
-  </body>
 
+  <body class="bg-gray-100"> {% block content %}
+    {% endblock content %}
+    {% include 'toast.html' %}
+    {% include 'modal.html' %}
+
+    <script>
+        // fungsi toast
+        const toast = document.getElementById('toast-notification');
+        const toastMessage = document.getElementById('toast-message');
+
+        function showToast(message, isError = false) {
+            toastMessage.innerText = message;
+            
+            // beda warna berdasarkan status (error or sukses)
+            if (isError) {
+                toast.classList.add('bg-red-500');
+                toast.classList.remove('bg-green-500');
+            } else {
+                toast.classList.add('bg-green-500');
+                toast.classList.remove('bg-red-500');
+            }
+
+            // tampilin toast
+            toast.classList.remove('hidden', 'translate-x-full');
+            toast.classList.add('translate-x-0');
+
+            // hide setelah 3 sekon
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                toast.classList.remove('translate-x-0');
+                setTimeout(() => toast.classList.add('hidden'), 300); // wait till animasi selesai
+            }, 3000);
+        }
+
+        // fungsi2 modal
+        const modalBackdrop = document.getElementById('modal-backdrop');
+        const modalContent = document.getElementById('modal-content');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+
+        // fungsi utk tampilin modal
+        function showModal(title, bodyHtml) {
+            modalTitle.innerText = title;
+            modalBody.innerHTML = bodyHtml;
+
+            modalBackdrop.classList.remove('hidden');
+            setTimeout(() => { // jeda 
+                modalContent.classList.add('scale-100', 'opacity-100');
+                modalContent.classList.remove('scale-95', 'opacity-0');
+            }, 50);
+        }
+
+        // fungsi utk hide modal
+        function hideModal() {
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modalBackdrop.classList.add('hidden');
+                modalTitle.innerText = '';
+                modalBody.innerHTML = ''; // emptying modal
+            }, 300);
+        }
+
+        // event listener utk tombol close
+        modalCloseBtn.addEventListener('click', hideModal);
+        // event listener utk klik di backdrop (di luar modal)
+        modalBackdrop.addEventListener('click', (event) => {
+            if (event.target === modalBackdrop) {
+                hideModal();
+            }
+        });
+
+    </script>
+    
+    {% block javascript %}
+    {% endblock javascript %}
+
+  </body>
 </html>
