@@ -23,13 +23,13 @@ def show_json(request, news_id):
                 "is_edited": c.is_edited,
                 "date": c.created_at.strftime("%d %b %Y, %H:%M"),
                 "is_owner": c.user == request.user if request.user.is_authenticated else False,
+                "can_delete": (c.user == request.user or request.user.is_superuser) if request.user.is_authenticated else False,  # TAMBAHAN INI
             }
             for c in comments
         ]
         return JsonResponse(data, safe=False)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-
 
 @login_required(login_url='/login/')  # Redirect ke login jika tidak authenticated
 @require_POST
@@ -111,7 +111,7 @@ def delete_comment(request, comment_id):
         comment = get_object_or_404(Comment, id=comment_id)
         
         # Check ownership
-        if comment.user != request.user:
+        if comment.user != request.user and not request.user.is_superuser:
             return JsonResponse({"error": "You don't have permission to delete this comment."}, status=403)
         
         comment.delete()
