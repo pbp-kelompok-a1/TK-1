@@ -2,6 +2,9 @@
 {% load static %}
 
 {% block content %}
+
+{% include 'navbar.html' %}
+
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -26,6 +29,7 @@
                     'primary': '#4f46e5',
                     'secondary': '#10b981',
                     'sky-light': '#8ac5ff',
+                    'paraworld-blue': '#0077ff', // added custom base color for gradient
                 }
             }
         }
@@ -35,26 +39,29 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     <!-- Header Section -->
-    <header class="mb-8 p-6 rounded-xl shadow-lg bg-gradient-to-r from-primary to-sky-light text-white">
-        <h1 class="text-4xl font-extrabold tracking-tight mb-2">Upcoming Sports Tournaments</h1>
-        <p class="text-lg opacity-90 mb-4">View major Global Events and user-submitted Community Tournaments.</p>
-        
-        <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-            {% if user_is_logged_in %}
-            <a href="{% url 'event:event_create' %}"
-               class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-md text-white bg-secondary hover:bg-emerald-600 transition duration-150">
-                <i data-lucide="plus-circle" class="w-5 h-5 mr-2"></i>
-                Create Community Tournament
-            </a>
-            {% endif %}
+    <header class="relative mb-8 p-6 rounded-xl shadow-lg overflow-hidden text-white">
+        <div class="absolute inset-0 bg-gradient-to-r from-paraworld-blue via-blue-500 to-cyan-400"></div>
+        <div class="relative z-10">
+            <h1 class="text-4xl font-extrabold tracking-tight mb-2">Upcoming Sports Tournaments</h1>
+            <p class="text-lg opacity-90 mb-4">View major Global Events and user-submitted Community Tournaments.</p>
+            
+            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                {% if user_is_logged_in %}
+                <a href="{% url 'event:event_create' %}"
+                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-md text-white bg-secondary hover:bg-emerald-600 transition duration-150">
+                    <i data-lucide="plus-circle" class="w-5 h-5 mr-2"></i>
+                    Create Community Tournament
+                </a>
+                {% endif %}
 
-            {% if is_admin %}
-            <a href="{% url 'event:event_create_global' %}" 
-               class="inline-flex items-center px-4 py-2 border border-white text-sm font-medium rounded-lg shadow-md bg-opacity-20 hover:bg-opacity-30 transition duration-150">
-                <i data-lucide="shield-check" class="w-5 h-5 mr-2"></i>
-                Add Global Event (Admin)
-            </a>
-            {% endif %}
+                {% if is_admin %}
+                <a href="{% url 'event:event_create_global' %}" 
+                   class="inline-flex items-center px-4 py-2 border border-white text-sm font-medium rounded-lg shadow-md bg-opacity-20 hover:bg-opacity-30 transition duration-150">
+                    <i data-lucide="shield-check" class="w-5 h-5 mr-2"></i>
+                    Add Global Event (Admin)
+                </a>
+                {% endif %}
+            </div>
         </div>
     </header>
 
@@ -80,7 +87,7 @@
         <div class="event-card bg-white shadow-lg rounded-xl overflow-hidden transform hover:scale-[1.02] transition duration-300 card-{{ event.event_type }}" 
              data-type="{% if event.is_global_event %}global{% else %}community{% endif %}">
 
-            <!-- ✅ Picture Section -->
+            <!-- Picture Section -->
             <img src="{{ event.picture_url|default:'https://placehold.co/600x200/4f46e5/ffffff?text=No+Image' }}" 
                  alt="{{ event.title }}" 
                  class="event-image"
@@ -131,7 +138,6 @@
                 </a>
                 {% endif %}
 
-                <!-- ✅ Delete Button (Only Creator or Admin) -->
                 {% if user == event.creator or is_admin %}
                 <form action="{% url 'event_delete' event.id %}" method="post" 
                       onsubmit="return confirm('Are you sure you want to delete this event?');">

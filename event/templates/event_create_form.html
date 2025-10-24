@@ -2,6 +2,9 @@
 {% load widget_tweaks %}
 
 {% block content %}
+
+{% include 'navbar.html' %}
+
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
 	<!-- Header -->
@@ -44,7 +47,6 @@
 						{% endif %}
 					</label>
 
-					<!-- This line applies the custom styling via the widget_tweaks 'attr' filter -->
 					{{ field|attr:"class:django-input" }}
 
 					{% for error in field.errors %}
