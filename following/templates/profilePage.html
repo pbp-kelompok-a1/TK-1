@@ -327,7 +327,7 @@
                 <div class="activity-item">
                     <span class="activity-username">@{{ username }}</span>
                     <span class="activity-text"> posted an event: </span>
-                    <a href="{% url 'event:detail' activity.object.id %}" class="activity-link">{{ activity.object.title }}</a>
+                    <a href="{% url 'event:event_list' %}" class="activity-link">{{ activity.object.title }}</a>
                 </div>
             {% else %}
                 <div class="activity-item">
