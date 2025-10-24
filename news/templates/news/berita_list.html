@@ -45,7 +45,7 @@
 {% endif %}
 
 <!-- GRID CARD NEWS (except latest) -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
   {% for b in berita|slice:"1:" %}
     <a href="{% url 'news:berita_detail' b.id %}" class="block bg-gray-200 rounded-xl p-4 shadow-md transform transition duration-300 hover:scale-105 hover:shadow-lg">
 
@@ -68,3 +68,48 @@
 </main>
 
 {% endblock %}
+{% block javascript %}
+<script>
+document.addEventListener('click', async (e) => {
+    // intercept tombol create
+    if (e.target.closest('a[href$="add/"]')) {
+        e.preventDefault();
+        const url = e.target.closest('a').href;
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        showModal("Create News", data.html);
+
+        requestAnimationFrame(() => {
+            const form = document.querySelector('#modal-body form');
+            form.addEventListener('submit', async ev => {
+                ev.preventDefault();
+                const fd = new FormData(form);
+
+                const post = await fetch(url, {method: "POST", body: fd});
+                const out = await post.json();
+
+                if (out.status === "ok") {
+                    hideModal();
+                    showToast("News created");
+
+                    const card = `
+                    <a href="${out.url_detail}" class="block bg-gray-200 rounded-xl p-4 shadow-md transform transition duration-300 hover:scale-105 hover:shadow-lg">
+                        ${out.thumbnail
+                            ? `<img src="${out.thumbnail}" class="w-full h-32 object-cover rounded mb-2">`
+                            : `<div class="w-full h-32 bg-gray-300 rounded mb-2"></div>`}
+                        <span class="text-xs bg-blue-200 px-2 py-1 rounded">${out.category}</span>
+                        <h3 class="mt-2 font-medium text-sm line-clamp-3">${out.title}</h3>
+                    </a>`;
+
+                    document.getElementById('news-grid')
+                        .insertAdjacentHTML('afterbegin', card);
+                }
+            });
+        });
+
+    }
+});
+</script>
+{% endblock javascript %}
