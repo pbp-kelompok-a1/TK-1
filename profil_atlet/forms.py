@@ -1,5 +1,5 @@
 from django import forms
-from .models import Atlet
+from .models import Atlet, Medali
 from django.utils.html import strip_tags
 
 INPUT_DATE_FORMATS = [
@@ -74,4 +74,29 @@ class AtletForm(forms.ModelForm):
         data = self.cleaned_data.get('nationality')
         if data:
             return strip_tags(data)
+        return data
+    
+class MedaliForm(forms.ModelForm):
+    class Meta:
+        model = Medali
+        # 'atlet' akan kita isi otomatis di view
+        exclude = ('atlet',)
+
+    def clean_event(self):
+        data = self.cleaned_data.get('event')
+        if data:
+            return strip_tags(data)
+        return data
+
+    def clean_medal_type(self):
+        data = self.cleaned_data.get('medal_type')
+        if data:
+            return strip_tags(data)
+        return data
+
+    def clean_year(self):
+        data = self.cleaned_data.get('year')
+        if data:
+            # ubah ke string dulu sebelum di-strip
+            return strip_tags(str(data))
         return data
