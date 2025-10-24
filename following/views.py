@@ -21,6 +21,7 @@ def getListOfNews(user):
     followed_sports = Following.objects.all().filter(user=user, sport_type=OuterRef('cabangOlahraga'))
     return (Berita.objects.annotate(is_followed=Exists(followed_sports)).order_by('-is_followed', '-date'))
 
+@login_required
 def profilePage(request, userId):
     if (request.user == None): return redirect('main:login')
     if request.method == "POST" and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -58,23 +59,23 @@ def profilePage(request, userId):
         name = currentUser.name if hasattr(currentUser, 'name') else request.user.username
         username = currentUser.username if hasattr(currentUser, 'username') else request.user.username
         
-        following = Following.objects.filter(user=request.user)
-        comment = Comment.objects.filter(user=request.user)
-        event = Event.objects.filter(creator=request.user)
+        followingCount = Following.objects.filter(user=request.user).count()
+        commentCount = Comment.objects.filter(user=request.user).count()
+        eventCount = Event.objects.filter(creator=request.user).count()
         
         return render(request, "profilePage.html", {
             "form": form,
             "profilePicture": profilePicture,
             "name": name,
             "username": username,
-            "following": following,
-            "comment": comment,
-            "event": event
+            "followingCount": followingCount,
+            "commentCount": commentCount,
+            "eventCount": eventCount
         }, status=200)
 
+@login_required
 @require_POST
 def unfollow(request, follow_id):
-    if (request.user == None): return redirect('main:login')
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         try:
             follow = Following.objects.get(id=follow_id, user=request.user)

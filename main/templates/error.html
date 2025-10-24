@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Main | ParaWorld</title>
+{% endblock meta %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<style>
+    .button {
+        width: 170px;
+        padding: 16px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background-color 0.2s;
+    }
+
+    .button-primary {
+        background-color: #38BDF8;
+        color: white;
+    }
+
+    .button-primary:hover {
+        background-color: #38BDF8;
+    }
+</style>
+
+<div style="width: 75%; position: relative; left: 14%">
+    <img src="{% static 'images/error.png' %}" alt="Error" class="w-full h-full object-contain">
+</div>
+
+<div style="text-align: center; position: relative; left: 41%; width: 170px;">
+    <p style="font-size: 100px;">Error</p>
+    <button class="button button-primary">
+    <a href="{% url 'main:show_main' %}">Go To Homepage</a>
+ </button>
+</div>
+
+{% endblock content %}
