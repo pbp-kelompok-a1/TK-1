@@ -14,6 +14,7 @@ from news.models import Berita
 from comment.models import Comment
 
 # Create your views here.
+# For events
 def createSportOnStart():
     tennis = CabangOlahraga(name="Tennis")
     swimming = CabangOlahraga(name="Swimming")
@@ -46,6 +47,7 @@ def createSportOnStart():
         elif (event.sport_branch == 'basket'): event.cabangOlahraga = basket
         else: event.cabangOlahraga = other
 
+# For news
 def createSportOnStart2():
     tennis = CabangOlahraga(name="Tennis")
     swimming = CabangOlahraga(name="Swimming")
@@ -200,3 +202,4 @@ def createCabangOlahraga(request):
         if (form.is_valid()):
             form.save()
             return redirect('main:show_main')
+        
