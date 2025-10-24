@@ -12,28 +12,28 @@
     </a>
 
     <!-- TITLE -->
-    <h1 class="text-3xl font-bold mb-3 leading-tight">
+    <h1 id="detail-title" class="text-3xl font-bold mb-3 leading-tight">
         {{ b.title }}
     </h1>
 
     <!-- META -->
-    <p class="text-gray-600 mb-6 text-sm">
-        {{ b.date|date:"d M Y" }} · by {{ b.author.username }} · {{ b.get_category_display }}
+    <p id="detail-meta" class="text-gray-600 mb-6 text-sm">
+        {{ b.created_at|date:"d M Y" }} · by {{ b.author.username }} · {{ b.get_category_display }}
     </p>
 
     <!-- THUMBNAIL -->
     {% if b.thumbnail %}
-        <img src="{{ b.thumbnail }}"
+        <img id="detail-thumb" src="{{ b.thumbnail }}"
             class="w-full max-h-96 object-cover rounded mb-8 shadow">
     {% else %}
-        <div class="w-full h-64 bg-gray-300 rounded mb-8"></div>
+        <div id="detail-thumb" class="w-full h-64 bg-gray-300 rounded mb-8"></div>
     {% endif %}
 
-
     <!-- CONTENT -->
-    <div class="prose max-w-none">
+    <div id="detail-content" class="prose max-w-none">
         {{ b.content|linebreaks }}
     </div>
+
 
     <!-- OWNER EDIT/DELETE -->
     {% if request.user == b.author or request.user.is_superuser %}
@@ -51,3 +51,114 @@
 </div>
 
 {% endblock %}
+{% block javascript %}
+<script>
+document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('a[href*="/edit/"]')
+    if (!btn) return
+
+    e.preventDefault()
+    const url = btn.href
+
+    // GET form
+    const res = await fetch(url)
+    const data = await res.json()
+    showModal("Edit News", data.html)
+
+    requestAnimationFrame(() => {
+        const form = document.querySelector('#modal-body form')
+        form.addEventListener('submit', async ev => {
+            ev.preventDefault()
+            const fd = new FormData(form)
+            const post = await fetch(url, {method:"POST", body:fd})
+            const out = await post.json()
+
+            if (out.status === "ok") {
+                hideModal()
+                showToast("News edited")
+
+                // payload konten baru tidak dikirim full dari server
+                // jadi kita GET ulang detail sebagai HTML, lalu extract bagian yang perlu di-update
+                const fresh = await fetch(out.url_detail)
+                const html = await fresh.text()
+
+                // bikin DOM sementara buat parse HTML
+                const temp = document.createElement("div")
+                temp.innerHTML = html
+
+                // ambil elemen baru
+                const newTitle = temp.querySelector('#detail-title')?.innerHTML
+                const newMeta = temp.querySelector('#detail-meta')?.innerHTML
+                const newThumb = temp.querySelector('#detail-thumb')
+                const newContent = temp.querySelector('#detail-content')?.innerHTML
+
+                // apply ke DOM yang sekarang
+                if (newTitle) document.querySelector('#detail-title').innerHTML = newTitle
+                if (newMeta) document.querySelector('#detail-meta').innerHTML = newMeta
+                if (newContent) document.querySelector('#detail-content').innerHTML = newContent
+
+                // update thumbnail
+                const currThumb = document.querySelector('#detail-thumb')
+                if (newThumb) {
+                    if (newThumb.tagName === 'IMG') {
+                        if (currThumb.tagName !== 'IMG') {
+                            // replace div -> img
+                            currThumb.outerHTML = newThumb.outerHTML
+                        } else {
+                            currThumb.src = newThumb.src
+                        }
+                    } else {
+                        // replace img -> div placeholder
+                        currThumb.outerHTML = newThumb.outerHTML
+                    }
+                }
+            }
+
+        })
+    })
+})
+document.addEventListener('click', async e => {
+    const btn = e.target.closest('a[href*="/delete/"]')
+    if (!btn) return
+
+    e.preventDefault()
+    const url = btn.href
+
+    // tampilkan modal konfirmasi
+    showModal("Confirm Delete", `
+        <p class="mb-4">Are you sure you want to delete this news?</p>
+        <button id="confirm-del" class="bg-red-600 text-white px-4 py-2 rounded">Delete</button>
+    `)
+
+    requestAnimationFrame(() => {
+        document.getElementById('confirm-del').addEventListener('click', async () => {
+            const res = await fetch(url, {method:"POST", headers: {"X-CSRFToken": getCookie("csrftoken")} })
+            const out = await res.json()
+
+            if (out.status === "ok") {
+                hideModal()
+                showToast("Deleted")
+                setTimeout(()=>{ window.location.href = "/news/"; }, 1000)
+            }
+        })
+    })
+})
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+
+</script>
+{% endblock javascript %}
+

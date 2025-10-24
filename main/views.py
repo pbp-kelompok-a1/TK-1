@@ -8,6 +8,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 import datetime
+from news.models import Berita
+from event.models import Event
+from profil_atlet.models import Atlet
 
 from .models import CustomUser
 
@@ -49,10 +52,19 @@ def logout_user(request):
     return response
 
 def show_main(request):
+    # Ambil 3–5 berita terbaru
+    top_news = Berita.objects.all().order_by('-id')[:10]
+    upcoming_events = Event.objects.filter(start_time__gte=timezone.now()).order_by('start_time')[:10]
+    top_athletes = Atlet.objects.filter(is_visible=True).order_by('id')[:10]
+
     context = {
-        'last_login': request.COOKIES.get('last_login', 'Never')
+        'last_login': request.COOKIES.get('last_login', 'Never'),
+        'top_news': top_news,
+        'upcoming_events': upcoming_events,
+        'featured_athletes':top_athletes,
     }
     return render(request, "main.html", context)
 
 def errorPage(request):
     return render(request, "error.html")
+

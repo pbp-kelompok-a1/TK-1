@@ -1,15 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.contrib import messages
-from django.forms import ModelForm
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
-from .models import Event, EventType 
+from .models import Event, EventType
 from .forms import EventForm
-
 from following.views import getListOfEvents, createSportOnStart
 
-# Create your views here.
 def event_list(request):
     createSportOnStart()
     
@@ -21,13 +20,12 @@ def event_list(request):
         try:
             upcoming_events = getListOfEvents(request.user).filter(start_time__gte=timezone.now())
         except:
-            upcoming_events = upcoming_events
+            pass
     
     context = {
         'events': upcoming_events,
         'user_is_logged_in': user_is_logged_in,
         'is_admin': is_admin,
-        
         'EVENT_TYPE_GLOBAL': EventType.GLOBAL,
         'EVENT_TYPE_COMMUNITY': EventType.COMMUNITY,
     }
@@ -36,74 +34,57 @@ def event_list(request):
 
 @login_required
 def event_create(request):
-    if not request.user.is_authenticated:
-        messages.error(request, "You must be logged in to create a Community Event.")
-        return redirect('event_list')
-
     if request.method == 'POST':
         form = EventForm(request.POST)
         if form.is_valid():
             event = form.save(commit=False)
             event.creator = request.user
-            event.event_type = EventType.COMMUNITY 
+            event.event_type = EventType.COMMUNITY
             event.save()
-            
             messages.success(request, f"Tournament '{event.title}' created successfully!")
-            response = redirect('event_list')
-
-            storage = messages.get_messages(request)
-            list(storage) 
-
-            return response
+            return redirect('event:event_list')
     else:
         form = EventForm()
     
-    context = {
-        'form': form,
-        'page_title': "Create Community Tournament"
-    }
+    context = {'form': form, 'page_title': "Create Community Tournament"}
     return render(request, 'event_create_form.html', context)
 
 @login_required
 def event_create_global(request):
     if not request.user.is_staff:
         messages.error(request, "Only admins can create Global Events.")
-        return redirect('event_list')
+        return redirect('event:event_list')
 
     if request.method == 'POST':
         form = EventForm(request.POST)
         if form.is_valid():
             event = form.save(commit=False)
-            event.event_type = EventType.GLOBAL
             event.creator = request.user
+            event.event_type = EventType.GLOBAL
             event.save()
-            
             messages.success(request, f"Global Tournament '{event.title}' created successfully!")
-            response = redirect('event_list')
-
-            storage = messages.get_messages(request)
-            list(storage) 
-
-            return response
+            return redirect('event:event_list')
     else:
         form = EventForm()
 
-    context = {
-        'form': form,
-        'page_title': "Create Global Tournament (Admin)"
-    }
+    context = {'form': form, 'page_title': "Create Global Tournament (Admin)"}
     return render(request, 'event_create_form.html', context)
 
-
 @login_required
+@require_POST
 def event_delete(request, event_id):
     event = get_object_or_404(Event, id=event_id)
-    
-    # Only allow creator or admin
     if request.user == event.creator or request.user.is_staff:
+        title = event.title
         event.delete()
-        messages.success(request, f'Event "{event.title}" deleted successfully.')
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': f'Event "{title}" deleted successfully.'})
+        
+        messages.success(request, f'Event "{title}" deleted successfully.')
+        return redirect('event:event_list')
     else:
-        messages.error(request, "You do not have permission to delete this event.")
-    
-    return redirect('event_list')
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'Permission denied.'}, status=403)
+        messages.error(request, 'Permission denied.')
+        return redirect('event:event_list')  

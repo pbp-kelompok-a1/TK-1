@@ -8,11 +8,310 @@
 {% block content %}
 {% include 'navbar.html' %}
 
-<div class="container mx-auto px-4 py-6">
-  <!-- Logged in info -->
-  <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-2 rounded-md text-sm mb-4">
-    Logged in as: <strong>{{ user.username }}</strong>
-  </div>
+<section class="relative min-h-screen flex items-center text-white"
+         style="background-image: url('{% static 'images/hero.png' %}'); background-size: cover; background-position: center;">
+  <!-- Overlay -->
+  <div class="absolute inset-0 bg-black/40"></div>
 
+  <div class="container mx-auto relative z-10 flex flex-col md:flex-row items-center px-6 md:px-12 py-12 md:py-24">
+    <!-- Text -->
+    <div class="md:w-3/5 text-center md:text-left space-y-6">
+      <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-tight">
+        Discover Top Athletes & Latest News
+      </h1>
+      <p class="text-white text-base sm:text-lg md:text-xl">
+        Discover world-class athletes, stay on top of match results, and never miss upcoming events and exclusive highlights. 
+      <p>
+     <div class="flex flex-col sm:flex-row justify-center md:justify-start gap-4 mt-4">
+        <a href="{% url 'event:event_list' %}" class="bg-[#3BC3FD] text-white px-6 py-3 rounded-full font-bold hover:bg-sky-700 transition w-full sm:w-auto text-center">
+          View Events
+        </a>
+        <a href="{% url 'profil_atlet:list_atlet' %}" class="bg-white text-[#3BC3FD] px-6 py-3 rounded-full font-bold hover:bg-gray-300 transition w-full sm:w-auto text-center">
+          View Athletes
+        </a>
+      </div>
+    </div>
+
+    <!-- Right side, lebih kecil -->
+    <div class="md:w-2/5 mt-10 md:mt-0 hidden md:block"></div>
 </div>
+</section>
+
+<!-- News Section -->
+<section class="py-12 bg-white" id="news">
+  <div class="px-4 sm:px-6 lg:px-8">
+    <!-- Header with title and button -->
+    <div class="flex justify-between items-start mb-8">
+      <div>
+        <h2 class="text-3xl font-bold text-gray-900">Latest News</h2>
+        <p class="mt-2 text-gray-600">Stay updated with the top stories</p>
+      </div>
+      <a href="{% url 'news:berita_list' %}" class="px-6 py-2 bg-sky-500 text-white font-semibold rounded-lg hover:bg-sky-600 transition">
+        View All News
+      </a>
+    </div>
+
+    <!-- News List -->
+    <div class="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
+      {% if top_news %}
+        {% for news_item in top_news %}
+        <div class="flex-shrink-0 w-80 bg-white shadow rounded-lg overflow-hidden">
+          {% if news_item.picture %}
+          <img src="{{ news_item.picture.url }}" alt="{{ news_item.title }}" class="w-full h-48 object-cover">
+          {% endif %}
+          <div class="p-4">
+            <h3 class="text-xl font-semibold text-gray-900">{{ news_item.title }}</h3>
+            <p class="mt-2 text-gray-600 text-sm line-clamp-3">{{ news_item.summary|default:news_item.title }}</p>
+            <a href="{% url 'news:berita_detail' news_item.id %}" class="mt-4 inline-block text-sky-500 font-medium hover:underline">
+              Read more
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="flex-shrink-0 w-full text-center py-20">
+          <img src="{% static 'images/empty.png' %}" alt="No News" class="mx-auto w-48 mb-4">
+          <p class="text-gray-500 text-lg">No news available at the moment. Stay tuned for upcoming updates!</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Divider Line -->
+    <hr class="mt-8 border-t border-gray-300">
+  </div>
+</section>
+
+<style>
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>
+
+<!-- Events Section -->
+<section class="py-12 bg-white" id="events">
+  <div class="px-4 sm:px-6 lg:px-8">
+    <!-- Header with title and button -->
+    <div class="flex justify-between items-start mb-8">
+      <div>
+        <h2 class="text-3xl font-bold text-gray-900">Upcoming Events</h2>
+        <p class="mt-2 text-gray-600">View major Global Events and user-submitted Community Tournaments</p>
+      </div>
+      <a href="{% url 'event:event_list' %}" class="px-6 py-2 bg-sky-500 text-white font-semibold rounded-lg hover:bg-sky-600 transition">
+        View All Events
+      </a>
+    </div>
+
+    <!-- Events List -->
+    <div class="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
+      {% if upcoming_events %}
+        {% for event in upcoming_events %}
+        <div class="flex-shrink-0 w-80 bg-white shadow-lg rounded-xl overflow-hidden transform hover:scale-[1.02] transition duration-300 {% if event.is_global_event %}card-global{% else %}card-community{% endif %}">
+          
+          <!-- Picture Section -->
+          <img src="{{ event.picture_url|default:'https://placehold.co/600x200/4f46e5/ffffff?text=No+Image' }}" 
+              alt="{{ event.title }}" 
+              class="w-full h-48 object-cover"
+              onerror="this.onerror=null;this.src='https://placehold.co/600x200/4f46e5/ffffff?text=Image+Unavailable';">
+
+          <div class="p-5">
+            <div class="flex items-center justify-between mb-3">
+              <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full 
+                  {% if event.is_global_event %}
+                      bg-indigo-100 text-primary
+                  {% else %}
+                      bg-emerald-100 text-secondary
+                  {% endif %}">
+                <i data-lucide="{% if event.is_global_event %}globe-2{% else %}users{% endif %}" class="w-3 h-3 mr-1.5"></i>
+                {{ event.get_event_type_display }}
+              </span>
+              <span class="text-xs text-gray-400">
+                {% if event.is_global_event %}
+                    Admin Added
+                {% else %}
+                    By: {{ event.creator.username|default:"[Deleted User]" }}
+                {% endif %}
+              </span>
+            </div>
+
+            <h3 class="text-xl font-bold text-gray-900 mb-2 truncate">{{ event.title }}</h3>
+            <p class="text-sm text-gray-600 line-clamp-3 mb-4">{{ event.description|default:"No description provided." }}</p>
+
+            <div class="space-y-2 text-sm text-gray-700">
+              <p class="flex items-center">
+                <i data-lucide="calendar" class="w-4 h-4 mr-2 text-primary"></i>
+                Starts: <span class="ml-1 font-medium">{{ event.start_time|date:"M d, Y P" }}</span>
+              </p>
+              {% if event.location %}
+              <p class="flex items-center">
+                <i data-lucide="map-pin" class="w-4 h-4 mr-2 text-primary"></i>
+                {{ event.location }}
+              </p>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="p-5 pt-0 flex justify-between items-center">
+            {% if event.official_link %}
+            <a href="{{ event.official_link }}" target="_blank" 
+              class="flex items-center text-sm font-semibold text-primary hover:text-indigo-700 transition duration-150">
+              Official Website <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+            </a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="flex-shrink-0 w-full text-center py-20">
+          <img src="{% static 'images/empty.png' %}" alt="No Events" class="mx-auto w-48 mb-4">
+          <p class="text-gray-500 text-lg">No events scheduled currently. Check back soon for exciting competitions!</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Divider Line -->
+    <hr class="mt-8 border-t border-gray-300">
+  </div>
+</section>
+
+<style>
+  .text-primary { color: #4f46e5; }
+  .text-secondary { color: #10b981; }
+  .card-global { border-left: 5px solid #4f46e5; }
+  .card-community { border-left: 5px solid #10b981; }
+  
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>
+
+<script>
+  // Initialize Lucide icons for events section
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+</script>
+
+<!-- Athletes Section -->
+<section class="py-12 bg-white" id="athletes">
+  <div class="px-4 sm:px-6 lg:px-8">
+    <!-- Header with title and button -->
+    <div class="flex justify-between items-start mb-8">
+      <div>
+        <h2 class="text-3xl font-bold text-gray-900">Featured Athletes</h2>
+        <p class="mt-2 text-gray-600">Celebrating Paralympic athletes whose determination inspires millions</p>
+      </div>
+      <a href="{% url 'profil_atlet:list_atlet' %}" class="px-6 py-2 bg-sky-500 text-white font-semibold rounded-lg hover:bg-sky-600 transition">
+        View All Athletes
+      </a>
+    </div>
+
+    <!-- Athletes List -->
+    <div class="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
+      {% if featured_athletes %}
+        {% for atlet in featured_athletes %}
+        <div class="flex-shrink-0 w-80 group bg-white/90 backdrop-blur-sm rounded-3xl border border-blue-200 shadow-lg hover:shadow-xl transition-all duration-400 hover:-translate-y-1 overflow-hidden">
+          <div class="relative z-10 p-8 flex flex-col justify-between h-full text-gray-800">
+            
+            <!-- Discipline & ID -->
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs font-bold uppercase tracking-widest bg-gradient-to-r from-blue-100 to-cyan-100 px-3 py-1 rounded-full border border-blue-200 text-blue-600">
+                {{ atlet.discipline }}
+              </span>
+              <span class="text-sm text-blue-500 font-semibold">#{{ atlet.pk }}</span>
+            </div>
+
+            <!-- Name -->
+            <h3 class="text-2xl font-bold text-blue-700 leading-tight">
+              {{ atlet.name }}
+              {% if atlet.short_name %}
+              <span class="text-base text-blue-400 font-medium ml-1">({{ atlet.short_name }})</span>
+              {% endif %}
+            </h3>
+
+            <!-- Country -->
+            <div class="flex items-center text-gray-600 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+              </svg>
+              <span>{{ atlet.country }}</span>
+            </div>
+
+            <!-- Medals -->
+            <div class="mt-5 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200/40 overflow-hidden">
+              <table class="w-full text-center text-sm">
+                <thead class="bg-blue-100/60 text-blue-800 font-semibold uppercase text-xs">
+                  <tr>
+                    <th class="py-2">🥇 Gold</th>
+                    <th class="py-2">🥈 Silver</th>
+                    <th class="py-2">🥉 Bronze</th>
+                    <th class="py-2">🏅 Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="text-gray-700 font-medium">
+                    <td class="py-2">{{ atlet.gold_count|default:0 }}</td>
+                    <td class="py-2">{{ atlet.silver_count|default:0 }}</td>
+                    <td class="py-2">{{ atlet.bronze_count|default:0 }}</td>
+                    <td class="py-2">{{ atlet.total_medals|default:0 }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Button -->
+            {% if user.is_authenticated %}
+            <a href="/atlet/{{ atlet.pk }}/" 
+              class="mt-6 block w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-semibold shadow-md hover:shadow-lg hover:from-blue-600 hover:to-cyan-500 transition-all duration-300 text-center">
+              View Details
+            </a>
+            {% else %}
+            <p class="text-sm text-gray-400 italic mt-5 text-center">Login to view details.</p>
+            {% endif %}
+
+          </div>
+
+          <!-- Glow accent -->
+          <div class="absolute -bottom-8 -right-8 w-36 h-36 bg-gradient-to-tr from-blue-300/30 to-cyan-200/20 rounded-full blur-3xl opacity-70"></div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="flex-shrink-0 w-full text-center py-20">
+          <img src="{% static 'images/noathletes.png' %}" alt="No Athletes" class="mx-auto w-48 mb-4">
+          <p class="text-gray-500 text-lg">No featured athletes at the moment. Check back later to discover inspiring profiles!</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Divider Line -->
+    <hr class="mt-8 border-t border-gray-300">
+  </div>
+</section>
+
+<style>
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>
+
 {% endblock content %}
