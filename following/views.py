@@ -85,29 +85,7 @@ def profilePage(request, userId):
             follow.user = request.user
             follow.save()
 
-            already_chosen = Following.objects.filter(user=request.user).values_list('cabangOlahraga', flat=True)
-            form.fields['cabangOlahraga'].queryset = CabangOlahraga.objects.exclude(id__in=already_chosen)
-            
-            currentUser = CustomUser.objects.filter(user = request.user)
-            profilePicture = currentUser.picture if hasattr(currentUser, 'picture') else None
-            name = currentUser.name if hasattr(currentUser, 'name') else request.user.username
-            username = currentUser.username if hasattr(currentUser, 'username') else request.user.username
-            following = Following.objects.all().filter(user = request.user)
-
-            followingCount = Following.objects.filter(user=request.user).count()
-            commentCount = Comment.objects.filter(user=request.user).count()
-            eventCount = Event.objects.filter(creator=request.user).count()
-            
-            return render(request, "profilePage.html", {
-                "form": form,
-                "profilePicture": profilePicture,
-                "name": name,
-                "username": username,
-                "following": following,
-                "followingCount": followingCount,
-                "commentCount": commentCount,
-                "eventCount": eventCount
-            }, status=200)
+            return redirect('following:profile')
     else:
         form = FollowingForm()
         already_chosen = Following.objects.filter(user=request.user).values_list('cabangOlahraga', flat=True)
@@ -119,10 +97,25 @@ def profilePage(request, userId):
         username = currentUser.username if hasattr(currentUser, 'username') else request.user.username
         
         following = Following.objects.all().filter(user = request.user)
+        comment = Comment.objects.filter(user=request.user)
+        event = Event.objects.filter(creator=request.user)
+        news = Berita.objects.filter(author=request.user)
+
+        threeRecentActivity = list(comment) + list(event)
+        threeRecentActivity.sort(key=lambda x: x.created_at, reverse=True)
+        threeRecentActivity = threeRecentActivity[:3]
+        recentActivity = []
+        for activity in threeRecentActivity:
+            recentActivity.append({
+                "content": activity,
+                "type": activity.__class__.__name__,
+            })
+
         followingCount = Following.objects.filter(user=request.user).count()
         commentCount = Comment.objects.filter(user=request.user).count()
         eventCount = Event.objects.filter(creator=request.user).count()
-        
+        is_admin = request.user.is_superuser
+
         return render(request, "profilePage.html", {
             "form": form,
             "profilePicture": profilePicture,
@@ -131,7 +124,9 @@ def profilePage(request, userId):
             "following": following,
             "followingCount": followingCount,
             "commentCount": commentCount,
-            "eventCount": eventCount
+            "eventCount": eventCount,
+            "is_admin": is_admin,
+            "recentActivity": recentActivity
         }, status=200)
 
 @login_required
@@ -160,13 +155,13 @@ def unfollow(request, follow_id):
         'error': 'Invalid request'
     }, status=400)
 
-@user_passes_test(is_admin)
 def createCabangOlahraga(request):
-    if not request.user.is_superuser: return redirect('main:error')
-    
-    form = OlahragaForm()
-    context = {
-        'form': form,
-        'page_title': 'Add Sport'
-    }
-    return render(request, 'cabangOlahragaCreationPage.html', context)
+    if (request.method == 'GET'):
+        form = OlahragaForm()
+        context = {'form': form,'page_title': 'Add Sport'}
+        return render(request, 'cabangOlahragaCreationPage.html', context)
+    else:
+        form = OlahragaForm(request.POST)
+        if (form.is_valid()):
+            form.save()
+            return redirect('main:show_main')

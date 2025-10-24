@@ -19,7 +19,7 @@ class Berita(models.Model):
     thumbnail = models.URLField(blank=True, null=True)
     
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     cabangOlahraga = models.ForeignKey(CabangOlahraga, default=None, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
