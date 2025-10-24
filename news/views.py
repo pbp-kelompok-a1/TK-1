@@ -3,9 +3,10 @@ from django.contrib.auth.decorators import login_required
 from .forms import BeritaForm
 from .models import Berita
 
-from following.views import getListOfNews
+from following.views import getListOfNews, createSportOnStart2
 
 def berita_list(request):
+    createSportOnStart2()
     berita = Berita.objects.all().order_by('-id')
     if request.user != None:
         try:
