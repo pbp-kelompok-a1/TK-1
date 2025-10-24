@@ -143,7 +143,7 @@ def profilePage(request, userId):
         recentActivity = []
         for activity in threeRecentActivity:
             recentActivity.append({
-                "content": activity,
+                "object": activity,
                 "type": activity.__class__.__name__,
             })
 
