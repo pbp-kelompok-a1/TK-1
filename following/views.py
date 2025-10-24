@@ -55,7 +55,7 @@ def getListOfEvents(user):
 
 def getListOfNews(user):
     followed_sports = Following.objects.all().filter(user=user, sport_type=OuterRef('cabangOlahraga'))
-    return (Berita.objects.annotate(is_followed=Exists(followed_sports)).order_by('-is_followed', '-date'))
+    return (Berita.objects.annotate(is_followed=Exists(followed_sports)).order_by('-is_followed', '-created_at'))
 
 @login_required
 def profilePage(request, userId):
