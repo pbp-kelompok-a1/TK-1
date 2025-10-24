@@ -1,7 +1,6 @@
 <!-- comment.html -->
 {% load static %}
-
-<div class="max-w-3xl mx-auto px-4 sm:px-6" id="comment-section" data-news-id="{{ news_id }}">
+<div class="max-w-6xl mx-auto px-4 py-10" id="comment-section" data-news-id="{{ news_id }}">
     
     <!-- Form Add Comment -->
     {% if user.is_authenticated %}
@@ -166,8 +165,9 @@ document.addEventListener("DOMContentLoaded", function() {
       });
   }
 
-  function renderComment(comment) {
+function renderComment(comment) {
     const isOwner = comment.is_owner === true;
+    const canDelete = comment.can_delete === true;
     const edited = comment.is_edited ? `<span class="text-xs text-gray-400 italic ml-1">(edited)</span>` : "";
     const safeContent = escapeHtml(comment.content);
     const safeUsername = escapeHtml(comment.user);
@@ -188,14 +188,18 @@ document.addEventListener("DOMContentLoaded", function() {
           <p class="comment-content text-gray-700 mt-2 whitespace-pre-wrap text-sm sm:text-base break-words">${safeContent}</p>
         </div>
       </div>
-      ${isOwner ? `
+      ${isOwner || canDelete ? `
         <div class="flex flex-wrap gap-3 mt-3">
-          <button class="edit-btn text-[#38BDF8] text-sm hover:text-blue-700 font-medium transition" data-id="${comment.id}">
-            Edit
-          </button>
-          <button class="delete-btn text-red-500 text-sm hover:text-red-700 font-medium transition" data-id="${comment.id}">
-            Delete
-          </button>
+          ${isOwner ? `
+            <button class="edit-btn text-[#38BDF8] text-sm hover:text-blue-700 font-medium transition" data-id="${comment.id}">
+              Edit
+            </button>
+          ` : ''}
+          ${canDelete ? `
+            <button class="delete-btn text-red-500 text-sm hover:text-red-700 font-medium transition" data-id="${comment.id}">
+              Delete
+            </button>
+          ` : ''}
         </div>
       ` : ''}
     `;
