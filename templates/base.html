@@ -68,7 +68,7 @@
         // fungsi utk tampilin modal
         function showModal(title, bodyHtml) {
             modalTitle.innerText = DOMPurify.sanitize(title);
-            modalBody.innerHTML = DOMPurify.sanitize(bodyHtml);
+            modalBody.innerHTML = bodyHtml;
 
             modalBackdrop.classList.remove('hidden');
             setTimeout(() => { // jeda 
