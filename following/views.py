@@ -13,6 +13,38 @@ from news.models import Berita
 from comment.models import Comment
 
 # Create your views here.
+def createSportOnStart():
+    tennis = CabangOlahraga(name="tennis")
+    renang = CabangOlahraga(name="renang")
+    atheltic = CabangOlahraga(name="athletic")
+    basket = CabangOlahraga(name="basket")
+    other = CabangOlahraga(name="other")
+
+    tennisNotCreated = True
+    renangNotCreated = True
+    athleticNotCreated = True
+    basketNotCreated = True
+    otherNotCreated = True
+    for sport in CabangOlahraga.objects.all().iterator():
+        if sport.name == tennis.name: tennisNotCreated = False
+        elif sport.name == renang.name: renangNotCreated = False
+        elif sport.name == atheltic.name: athleticNotCreated = False
+        elif sport.name == basket.name: basketNotCreated = False
+        elif sport.name == other.name: otherNotCreated = False
+    
+    if (tennisNotCreated): tennis.save()
+    if (renangNotCreated): renang.save()
+    if (athleticNotCreated): atheltic.save()
+    if (basketNotCreated): basket.save()
+    if (otherNotCreated): other.save()
+
+    for event in Event.objects.all():
+        if (event.sport_branch == 'tennis'): event.cabangOlahraga = tennis
+        elif (event.sport_branch == 'swim'): event.cabangOlahraga = renang
+        elif (event.sport_branch == 'atheltic'): event.cabangOlahraga = atheltic
+        elif (event.sport_branch == 'basket'): event.cabangOlahraga = basket
+        else: event.cabangOlahraga = other
+
 def is_admin(user):
     return user.is_superuser
 

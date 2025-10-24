@@ -41,7 +41,7 @@
         <a href="{% url 'main:show_main' %}" class="hover:bg-sky-600 px-4 py-3 rounded transition">HOME</a>
         <a href="{% url 'news:berita_list' %}" class="hover:bg-sky-600 px-4 py-3 rounded transition">NEWS</a>
         <a href="{% url 'profil_atlet:list_atlet' %}" class="hover:bg-sky-600 px-4 py-3 rounded transition">ATHLETES</a>
-        <a href="#" class="hover:bg-sky-600 px-4 py-3 rounded transition">EVENT</a>
+        <a href="{% url 'event:event_list' %}" class="hover:bg-sky-600 px-4 py-3 rounded transition">EVENT</a>
         
         {% if request.user.is_authenticated %}
           <hr class="my-2 border-white/20">
