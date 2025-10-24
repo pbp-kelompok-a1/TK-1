@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'following',
     'rest_framework',
     'news',
+    'comment',
     'widget_tweaks',
 ]
 

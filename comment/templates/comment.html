@@ -1,0 +1,272 @@
+<!-- comment.html -->
+{% load static %}
+
+<div class="max-w-3xl mx-auto px-4 sm:px-6" id="comment-section" data-news-id="{{ news_id }}">
+    
+    <!-- Form Add Comment -->
+    {% if user.is_authenticated %}
+    <div class="mb-6">
+        <button id="add-comment-btn"
+            class="bg-sky-400 text-white px-4 py-2 rounded-full font-semibold shadow hover:bg-sky-500 transition w-full sm:w-auto">
+            Add Comment
+        </button>
+        
+        <!-- Input komentar (awalnya tersembunyi) -->
+        <div id="comment-input-wrapper" class="hidden mt-3">
+            <textarea id="comment-input" rows="3" placeholder="Write your comment here..."
+                class="w-full border border-gray-300 rounded-lg p-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-400 resize-none text-sm sm:text-base"></textarea>
+            
+            <div class="mt-2 flex flex-col sm:flex-row sm:gap-2 gap-3">
+                <button id="submit-comment-btn"
+                    class="bg-sky-400 text-white px-4 py-2 rounded-full font-semibold shadow hover:bg-sky-500 transition">
+                    Submit Comment
+                </button>
+                <button id="cancel-comment-btn"
+                    class="bg-gray-300 text-gray-700 px-4 py-2 rounded-full font-semibold shadow hover:bg-gray-400 transition">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="mb-6 text-center sm:text-left">
+        <p class="text-gray-600 text-sm sm:text-base">
+            <a href="{% url 'main:login' %}" class="text-sky-500 hover:text-sky-600 font-medium underline">Login</a> 
+            to add a comment
+        </p>
+    </div>
+    {% endif %}
+
+    <!-- Header Comments -->
+    <div class="flex items-center space-x-2 mb-6 justify-center sm:justify-start">
+        <img src="{% static 'images/comment.png' %}" alt="Comments" class="w-5 h-5 sm:w-6 sm:h-6">
+        <h2 class="text-base sm:text-lg font-semibold">Comments</h2>
+        <span id="comment-count" class="bg-sky-400 text-white px-2 py-0.5 rounded-full text-xs sm:text-sm">0</span>
+    </div>
+
+    <!-- Daftar komentar -->
+    <div id="comment-list" class="space-y-4 text-gray-800"></div>
+
+    <!-- State Kosong -->
+    <div id="no-comment" class="flex flex-col items-center mt-10 text-gray-600 hidden">
+        <img src="{% static 'images/no-comment.png' %}" alt="No comments" class="w-16 h-16 sm:w-24 sm:h-24 mb-3">
+        <p class="text-base sm:text-lg font-medium">No comments yet</p>
+        <p class="text-xs sm:text-sm">Be the first to share your thoughts!</p>
+    </div>
+</div>
+
+{% csrf_token %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const commentSection = document.getElementById("comment-section");
+  if (!commentSection) return;
+  
+  const commentList = document.getElementById("comment-list");
+  const commentCount = document.getElementById("comment-count");
+  const addCommentBtn = document.getElementById("add-comment-btn");
+  const commentInputWrapper = document.getElementById("comment-input-wrapper");
+  const commentInput = document.getElementById("comment-input");
+  const submitCommentBtn = document.getElementById("submit-comment-btn");
+  const cancelCommentBtn = document.getElementById("cancel-comment-btn");
+  const noCommentDiv = document.getElementById("no-comment");
+
+  const newsId = commentSection.dataset.newsId;
+  const loadUrl = `/comment/json/${newsId}/`;
+  const addUrl = `/comment/add/${newsId}/`;
+
+  const currentUser = "{{ request.user.username|escapejs }}";
+
+  // Toggle input box
+  if (addCommentBtn) {
+    addCommentBtn.addEventListener("click", function() {
+      commentInputWrapper.classList.toggle("hidden");
+      if (!commentInputWrapper.classList.contains("hidden")) {
+        commentInput.focus();
+      } else {
+        commentInput.value = "";
+      }
+    });
+  }
+
+  // Cancel
+  if (cancelCommentBtn) {
+    cancelCommentBtn.addEventListener("click", function() {
+      commentInputWrapper.classList.add("hidden");
+      commentInput.value = "";
+    });
+  }
+
+  // Submit
+  if (submitCommentBtn) {
+    submitCommentBtn.addEventListener("click", function() {
+      const content = commentInput.value.trim();
+      if (!content) {
+        alert("Please write a comment before submitting!");
+        return;
+      }
+
+      const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+      submitCommentBtn.disabled = true;
+      submitCommentBtn.textContent = "Submitting...";
+
+      fetch(addUrl, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrfToken,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({ content: content }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        commentInput.value = "";
+        commentInputWrapper.classList.add("hidden");
+        loadComments();
+      })
+      .catch(error => {
+        alert(error.message || "An error occurred. Please try again.");
+      })
+      .finally(() => {
+        submitCommentBtn.disabled = false;
+        submitCommentBtn.textContent = "Submit Comment";
+      });
+    });
+  }
+
+  // Load comments
+  function loadComments() {
+    commentList.innerHTML = '<p class="text-gray-500 text-center py-4 text-sm sm:text-base">Loading comments...</p>';
+    noCommentDiv.classList.add("hidden");
+    
+    fetch(loadUrl)
+      .then(response => response.json())
+      .then(data => {
+        commentList.innerHTML = "";
+        if (!Array.isArray(data) || data.length === 0) {
+          noCommentDiv.classList.remove("hidden");
+          commentCount.textContent = "0";
+          return;
+        }
+        noCommentDiv.classList.add("hidden");
+        data.forEach(comment => renderComment(comment));
+        commentCount.textContent = data.length;
+      })
+      .catch(error => {
+        commentList.innerHTML = `
+          <div class="text-center py-4">
+            <p class="text-red-500 font-medium">Failed to load comments</p>
+            <button id="retry-load-btn" class="mt-3 text-sky-500 hover:text-sky-600 text-sm underline">
+              Try again
+            </button>
+          </div>
+        `;
+        const retryBtn = document.getElementById("retry-load-btn");
+        if (retryBtn) retryBtn.addEventListener("click", loadComments);
+      });
+  }
+
+  function renderComment(comment) {
+    const isOwner = comment.is_owner === true;
+    const edited = comment.is_edited ? `<span class="text-xs text-gray-400 italic ml-1">(edited)</span>` : "";
+    const safeContent = escapeHtml(comment.content);
+    const safeUsername = escapeHtml(comment.user);
+    
+    const commentDiv = document.createElement("div");
+    commentDiv.className = "border-b border-gray-200 pb-4 mb-4 last:border-b-0";
+    commentDiv.id = `comment-${comment.id}`;
+    
+    commentDiv.innerHTML = `
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between">
+        <div class="flex-1">
+          <div class="flex flex-wrap items-center gap-2">
+            <p class="font-semibold text-gray-800 text-sm sm:text-base">${safeUsername}</p>
+            <span class="text-xs text-gray-400">•</span>
+            <p class="text-xs text-gray-500">${comment.date}</p>
+            ${edited}
+          </div>
+          <p class="comment-content text-gray-700 mt-2 whitespace-pre-wrap text-sm sm:text-base break-words">${safeContent}</p>
+        </div>
+      </div>
+      ${isOwner ? `
+        <div class="flex flex-wrap gap-3 mt-3">
+          <button class="edit-btn text-[#38BDF8] text-sm hover:text-blue-700 font-medium transition" data-id="${comment.id}">
+            Edit
+          </button>
+          <button class="delete-btn text-red-500 text-sm hover:text-red-700 font-medium transition" data-id="${comment.id}">
+            Delete
+          </button>
+        </div>
+      ` : ''}
+    `;
+    commentList.appendChild(commentDiv);
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  commentList.addEventListener("click", function(e) {
+    const target = e.target;
+    const id = target.dataset.id;
+    if (!id) return;
+
+    const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+
+    if (target.classList.contains("delete-btn")) {
+      if (confirm("Are you sure you want to delete this comment?")) {
+        target.disabled = true;
+        target.textContent = "Deleting...";
+        fetch(`/comment/delete/${id}/`, { method: "POST", headers: { "X-CSRFToken": csrfToken } })
+          .then(res => res.json())
+          .then(result => result.success && loadComments());
+      }
+    }
+
+    if (target.classList.contains("edit-btn")) {
+      const commentDiv = document.getElementById(`comment-${id}`);
+      const contentP = commentDiv.querySelector(".comment-content");
+      const oldContent = contentP.textContent;
+      contentP.outerHTML = `
+        <textarea class="edit-text w-full border border-gray-300 p-2 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-sky-400 text-sm sm:text-base" rows="3">${escapeHtml(oldContent)}</textarea>
+        <div class="mt-2 flex flex-wrap gap-2">
+          <button class="save-edit bg-[#38BDF8] text-white px-3 py-1 rounded text-sm hover:bg-sky-700" data-id="${id}">Save</button>
+          <button class="cancel-edit bg-gray-400 text-white px-3 py-1 rounded text-sm hover:bg-gray-500" data-id="${id}">Cancel</button>
+        </div>
+      `;
+    }
+
+    if (target.classList.contains("save-edit")) {
+      const commentDiv = document.getElementById(`comment-${id}`);
+      const editTextarea = commentDiv.querySelector(".edit-text");
+      const newContent = editTextarea.value.trim();
+      if (!newContent) {
+        alert("Comment cannot be empty!");
+        return;
+      }
+
+      target.disabled = true;
+      target.textContent = "Saving...";
+
+      fetch(`/comment/edit/${id}/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrfToken,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({ content: newContent }),
+      })
+      .then(res => res.json())
+      .then(result => result.success && loadComments());
+    }
+
+    if (target.classList.contains("cancel-edit")) {
+      loadComments();
+    }
+  });
+
+  loadComments();
+});
+</script>

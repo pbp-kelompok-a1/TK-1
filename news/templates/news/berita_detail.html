@@ -6,7 +6,7 @@
 
 <div class="max-w-4xl mx-auto py-8">
 
-    <a href="{% url 'berita_list' %}" 
+    <a href="{% url 'news:berita_list' %}" 
         class="inline-block mb-4 text-sky-600 hover:text-sky-800 text-sm font-medium">
         ← Back to News
     </a>
@@ -38,28 +38,15 @@
     <!-- OWNER EDIT/DELETE -->
     {% if request.user == b.author or request.user.is_superuser %}
         <div class="mt-6 flex gap-3">
-            <a href="{% url 'berita_edit' b.id %}" class="text-yellow-600 hover:underline">Edit</a>
-            <a href="{% url 'berita_delete' b.id %}" class="text-red-600 hover:underline">Delete</a>
+            <a href="{% url 'news:berita_edit' b.id %}" class="text-yellow-600 hover:underline">Edit</a>
+            <a href="{% url 'news:berita_delete' b.id %}" class="text-red-600 hover:underline">Delete</a>
         </div>
     {% endif %}
 
     <hr class="my-10">
 
     <!-- COMMENTS SECTION -->
-    <h2 class="text-xl font-semibold mb-4">Comments</h2>
-
-    {% if comments %}
-        {% for c in comments %}
-            <div class="mb-6 border-b pb-4">
-                <p class="font-semibold">{{ c.user.username }}
-                    <span class="text-sm text-gray-500">{{ c.created_at|date:"d M Y H:i" }}</span>
-                </p>
-                <p class="mt-1">{{ c.text }}</p>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p class="text-gray-500">No comments yet.</p>
-    {% endif %}
+    {% include 'comment.html' with news_id=b.id %}
 
 </div>
 
