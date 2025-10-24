@@ -29,7 +29,7 @@
                     'primary': '#4f46e5',
                     'secondary': '#10b981',
                     'sky-light': '#8ac5ff',
-                    'paraworld-blue': '#0077ff', // added custom base color for gradient
+                    'paraworld-blue': '#0077ff', 
                 }
             }
         }
@@ -170,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const eventCards = document.querySelectorAll('.event-card');
     const eventCountElement = document.getElementById('event-count');
     const tabButtons = document.querySelectorAll('[role="tablist"] button');
+    const noMsg = document.getElementById('no-events-message');
 
     function updateCount(count) {
         eventCountElement.textContent = count;
@@ -177,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function filterEvents(filterType) {
         let visibleCount = 0;
+
         eventCards.forEach(card => {
             const cardType = card.getAttribute('data-type');
             const show = (filterType === 'all' || cardType === filterType);
@@ -184,23 +186,25 @@ document.addEventListener('DOMContentLoaded', () => {
             if (show) visibleCount++;
         });
 
-        const noMsg = document.getElementById('no-events-message');
-        if (noMsg) noMsg.style.display = visibleCount === 0 ? 'block' : 'none';
+        if (noMsg) {
+            noMsg.style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+
         updateCount(visibleCount);
 
+        // update tab styles
         tabButtons.forEach(btn => {
-            btn.classList.remove('tab-active', 'text-gray-900');
-            btn.classList.add('text-gray-500');
-            if (btn.getAttribute('data-filter') === filterType) {
-                btn.classList.add('tab-active', 'text-gray-900');
-                btn.classList.remove('text-gray-500');
-            }
+            const isActive = btn.getAttribute('data-filter') === filterType;
+            btn.classList.toggle('tab-active', isActive);
+            btn.classList.toggle('text-gray-900', isActive);
+            btn.classList.toggle('text-gray-500', !isActive);
         });
     }
 
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            filterEvents(btn.getAttribute('data-filter'));
+            const filter = btn.getAttribute('data-filter');
+            filterEvents(filter);
         });
     });
 
