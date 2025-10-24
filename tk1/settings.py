@@ -114,7 +114,7 @@ else:
     }
 
 # mengarahkan @login_required ke halaman login di app 'main'
-LOGIN_URL = 'login'
+LOGIN_URL = 'main:login'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

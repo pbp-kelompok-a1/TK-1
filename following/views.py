@@ -2,7 +2,7 @@ from django.db.models import Exists, OuterRef
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from rest_framework.response import Response
 
 from .models import Following, CabangOlahraga
@@ -13,6 +13,9 @@ from news.models import Berita
 from comment.models import Comment
 
 # Create your views here.
+def is_admin(user):
+    return user.is_superuser
+
 def getListOfEvents(user):
     followed_sports = Following.objects.all().filter(user=user, sport_type=OuterRef('cabangOlahraga'))
     return (Event.objects.annotate(is_followed=Exists(followed_sports)).order_by('-is_followed', '-created_at'))
@@ -23,7 +26,6 @@ def getListOfNews(user):
 
 @login_required
 def profilePage(request, userId):
-    if (request.user == None): return redirect('main:login')
     if request.method == "POST" and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         form = FollowingForm(request.POST)
         if form.is_valid():
@@ -98,3 +100,14 @@ def unfollow(request, follow_id):
         'success': False,
         'error': 'Invalid request'
     }, status=400)
+
+@user_passes_test(is_admin)
+def createCabangOlahraga(request):
+    if not request.user.is_superuser: return redirect('main:error')
+    
+    form = OlahragaForm()
+    context = {
+        'form': form,
+        'page_title': 'Add Sport'
+    }
+    return render(request, 'cabangOlahragaCreationPage.html', context)
