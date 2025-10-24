@@ -31,7 +31,7 @@
           />
           <div class="text-white">
             <p class="font-bold">{{ request.user.username }}</p>
-            <p class="text-sm text-[#f5f1ce]">View Profile</p>
+            <a href="{% url 'profile' user.id %}" class="text-sm text-[#f5f1ce]">View Profile</a>
           </div>
         </div>
       {% endif %}
