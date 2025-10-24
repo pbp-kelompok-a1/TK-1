@@ -272,7 +272,7 @@
             <div class="profile-info">
                 <h1>{{ name }}</h1>
                 <div class="username">@{{ username }}</div>
-                <p class="bio">Sports enthusiast and Paralympic supporter. Passionate about inclusive sports and community events.</p>
+                <p class="bio">{{ bio }}</p>
             </div>
         </div>
 
@@ -283,7 +283,7 @@
             </div>
             <div class="stat">
                 <div class="stat-number">{{ commentCount }}</div>
-                <div class="stat-label">Comments</div>
+                <div class="stat-label">Comments Made</div>
             </div>
             <div class="stat">
                 <div class="stat-number">{{ eventCount }}</div>
@@ -295,7 +295,7 @@
         <div class="sports-container" id="sports-container">
             {% for follow in following %}
             <div class="sport-tag" data-id="{{ follow.id }}">
-                {{ follow.cabangOlahraga.name }}
+                {{ follow.cabangOlahraga }}
                 <button type="button" onclick="unfollowSport('{{ follow.id }}')">×</button>
             </div>
             {% endfor %}
@@ -322,29 +322,21 @@
 
         <h2 class="section-title" style="margin-top: 40px;">Recent Activity</h2>
         <div class="activity-list">
-            {% comment %} <div class="activity-item">
-                <div class="activity-dot"></div>
-                <div>
+            {% for activity in recentActivity %}
+            {% if activity.type == 'Event' %}
+                <div class="activity-item">
                     <span class="activity-username">@{{ username }}</span>
-                    <span class="activity-text"> commented on </span>
-                    <a href="#" class="activity-link">"Paralympic Swimming Finals"</a>
+                    <span class="activity-text"> posted an event: </span>
+                    <a href="{% url 'event:detail' activity.object.id %}" class="activity-link">{{ activity.object.title }}</a>
                 </div>
-            </div>
-            <div class="activity-item">
-                <div class="activity-dot"></div>
-                <div>
+            {% else %}
+                <div class="activity-item">
                     <span class="activity-username">@{{ username }}</span>
-                    <span class="activity-text"> followed a new sport: Wheelchair Racing</span>
+                    <span class="activity-text"> posted news: </span>
+                    <a href="{% url 'news:berita_detail' activity.object.id %}" class="activity-link">{{ activity.object.title }}</a>
                 </div>
-            </div>
-            <div class="activity-item">
-                <div class="activity-dot"></div>
-                <div>
-                    <span class="activity-username">@{{ username }}</span>
-                    <span class="activity-text"> joined event </span>
-                    <a href="#" class="activity-link">"Tokyo 2020 Replay"</a>
-                </div>
-            </div> {% endcomment %}
+            {% endif %}
+            {% endfor %}
         </div>
     </div>
 
@@ -354,7 +346,11 @@
             <div class="user-info">
                 <div class="info-row">
                     <span class="info-label">Role:</span>
+                    {% if 'is_admin' %}
+                    <span class="info-value">Admin</span>
+                    {% else %}
                     <span class="info-value">Member</span>
+                    {% endif %}
                 </div>
                 <div class="info-row">
                     <span class="info-label">Joined:</span>
@@ -362,9 +358,7 @@
                 </div>
             </div>
             <button class="button button-primary">
-                <a  href="{% url 'main:logout' %}">
-                    Logout
-                </a>
+                <a style="margin-top: 30px;" href="{% url 'main:logout' %}">Logout</a>
             </button>
         </div>
     </div>

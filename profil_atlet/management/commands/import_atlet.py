@@ -1,4 +1,8 @@
 # ini utk file profil_atlet/management/commands/import_atlet.py
+
+# penting utk cukup byk pakai 'self.stdout.write' agar mudah debugging dan kita tahu apakah
+# script berjalan lancar.
+
 import csv
 from django.core.management.base import BaseCommand
 from profil_atlet.models import Atlet, Medali
