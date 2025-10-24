@@ -165,6 +165,7 @@ def profilePage(request, userId):
 
 @login_required
 @require_POST
+@csrf_exempt
 def unfollow(request, follow_id):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         try:
