@@ -85,12 +85,12 @@ def is_admin(user):
 
 def getListOfEvents(user):
     createSportOnStart()
-    followed_sports = Following.objects.all().filter(user=user, sport_type=OuterRef('cabangOlahraga'))
+    followed_sports = Following.objects.all().filter(user=user, cabangOlahraga=OuterRef('cabangOlahraga'))
     return (Event.objects.annotate(is_followed=Exists(followed_sports)).order_by('-is_followed', '-created_at'))
 
 def getListOfNews(user):
     createSportOnStart2()
-    followed_sports = Following.objects.all().filter(user=user, sport_type=OuterRef('cabangOlahraga'))
+    followed_sports = Following.objects.all().filter(user=user, cabangOlahraga=OuterRef('cabangOlahraga'))
     return (Berita.objects.annotate(is_followed=Exists(followed_sports)).order_by('-is_followed', '-created_at'))
 
 @login_required

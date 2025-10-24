@@ -345,14 +345,6 @@
             <h3 class="section-title">User Info</h3>
             <div class="user-info">
                 <div class="info-row">
-                    <span class="info-label">Role:</span>
-                    {% if 'is_admin' %}
-                    <span class="info-value">Admin</span>
-                    {% else %}
-                    <span class="info-value">Member</span>
-                    {% endif %}
-                </div>
-                <div class="info-row">
                     <span class="info-label">Joined:</span>
                     <span class="info-value">{{ request.user.date_joined|date:"d M Y" }}</span>
                 </div>
