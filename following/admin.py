@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import CabangOlahraga, Following
 
-# Register your models here.
+admin.site.register(CabangOlahraga)
+admin.site.register(Following)
