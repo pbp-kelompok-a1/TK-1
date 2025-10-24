@@ -2,6 +2,7 @@ from django.db.models import Exists, OuterRef
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required, user_passes_test
 from rest_framework.response import Response
 
@@ -14,11 +15,11 @@ from comment.models import Comment
 
 # Create your views here.
 def createSportOnStart():
-    tennis = CabangOlahraga(name="tennis")
-    renang = CabangOlahraga(name="renang")
-    atheltic = CabangOlahraga(name="athletic")
-    basket = CabangOlahraga(name="basket")
-    other = CabangOlahraga(name="other")
+    tennis = CabangOlahraga(name="Tennis")
+    renang = CabangOlahraga(name="Renang")
+    atheltic = CabangOlahraga(name="Athletic")
+    basket = CabangOlahraga(name="Basket")
+    other = CabangOlahraga(name="Other")
 
     tennisNotCreated = True
     renangNotCreated = True
@@ -58,6 +59,7 @@ def getListOfNews(user):
 
 @login_required
 def profilePage(request, userId):
+    createSportOnStart()
     if request.method == "POST" and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         form = FollowingForm(request.POST)
         if form.is_valid():
@@ -69,7 +71,7 @@ def profilePage(request, userId):
                 'success': True,
                 'follow_id': follow.id,
                 'sport_id': follow.cabangOlahraga.id,
-                'sport_name': follow.cabangOlahraga.nama
+                'sport_name': follow.cabangOlahraga.name
             }, status=201)
         else:
             return JsonResponse({
@@ -82,7 +84,30 @@ def profilePage(request, userId):
             follow = form.save(commit=False)
             follow.user = request.user
             follow.save()
-            return redirect('following:profile')
+
+            already_chosen = Following.objects.filter(user=request.user).values_list('cabangOlahraga', flat=True)
+            form.fields['cabangOlahraga'].queryset = CabangOlahraga.objects.exclude(id__in=already_chosen)
+            
+            currentUser = CustomUser.objects.filter(user = request.user)
+            profilePicture = currentUser.picture if hasattr(currentUser, 'picture') else None
+            name = currentUser.name if hasattr(currentUser, 'name') else request.user.username
+            username = currentUser.username if hasattr(currentUser, 'username') else request.user.username
+            following = Following.objects.all().filter(user = request.user)
+
+            followingCount = Following.objects.filter(user=request.user).count()
+            commentCount = Comment.objects.filter(user=request.user).count()
+            eventCount = Event.objects.filter(creator=request.user).count()
+            
+            return render(request, "profilePage.html", {
+                "form": form,
+                "profilePicture": profilePicture,
+                "name": name,
+                "username": username,
+                "following": following,
+                "followingCount": followingCount,
+                "commentCount": commentCount,
+                "eventCount": eventCount
+            }, status=200)
     else:
         form = FollowingForm()
         already_chosen = Following.objects.filter(user=request.user).values_list('cabangOlahraga', flat=True)
@@ -93,6 +118,7 @@ def profilePage(request, userId):
         name = currentUser.name if hasattr(currentUser, 'name') else request.user.username
         username = currentUser.username if hasattr(currentUser, 'username') else request.user.username
         
+        following = Following.objects.all().filter(user = request.user)
         followingCount = Following.objects.filter(user=request.user).count()
         commentCount = Comment.objects.filter(user=request.user).count()
         eventCount = Event.objects.filter(creator=request.user).count()
@@ -102,6 +128,7 @@ def profilePage(request, userId):
             "profilePicture": profilePicture,
             "name": name,
             "username": username,
+            "following": following,
             "followingCount": followingCount,
             "commentCount": commentCount,
             "eventCount": eventCount
@@ -113,7 +140,7 @@ def unfollow(request, follow_id):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         try:
             follow = Following.objects.get(id=follow_id, user=request.user)
-            sport_name = follow.cabangOlahraga.nama
+            sport_name = follow.cabangOlahraga.name
             sport_id = follow.cabangOlahraga.id
             follow.delete()
             

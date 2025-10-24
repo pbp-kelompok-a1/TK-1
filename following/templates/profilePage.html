@@ -272,7 +272,7 @@
             <div class="profile-info">
                 <h1>{{ name }}</h1>
                 <div class="username">@{{ username }}</div>
-                <p class="bio">Sports enthusiast and Paralympic supporter. Passionate about inclusive sports and community events.</p>
+                <p class="bio">{{ bio }}</p>
             </div>
         </div>
 
@@ -283,7 +283,7 @@
             </div>
             <div class="stat">
                 <div class="stat-number">{{ commentCount }}</div>
-                <div class="stat-label">Comments</div>
+                <div class="stat-label">Comments Made</div>
             </div>
             <div class="stat">
                 <div class="stat-number">{{ eventCount }}</div>
@@ -295,7 +295,7 @@
         <div class="sports-container" id="sports-container">
             {% for follow in following %}
             <div class="sport-tag" data-id="{{ follow.id }}">
-                {{ follow.cabangOlahraga.name }}
+                {{ follow.cabangOlahraga }}
                 <button type="button" onclick="unfollowSport('{{ follow.id }}')">×</button>
             </div>
             {% endfor %}
