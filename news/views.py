@@ -28,7 +28,7 @@ def berita_create(request):
             obj = form.save(commit=False)
             obj.author = request.user      # otomatis
             obj.save()
-            return redirect('berita_list')
+            return redirect('news:berita_list')
     else:
         form = BeritaForm()
 
@@ -41,7 +41,7 @@ def berita_edit(request, pk):
         form = BeritaForm(request.POST, instance=item)
         if form.is_valid():
             form.save()
-            return redirect('berita_detail', pk=pk)
+            return redirect('news:berita_detail', pk=pk)
     else:
         form = BeritaForm(instance=item)
 
@@ -50,4 +50,4 @@ def berita_edit(request, pk):
 def berita_delete(request, pk):
     item = get_object_or_404(Berita, pk=pk)
     item.delete()
-    return redirect('berita_list')
+    return redirect('news:berita_list')
