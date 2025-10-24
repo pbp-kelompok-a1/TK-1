@@ -52,13 +52,39 @@
             <h3 class="text-xl font-bold text-paraworld-dark p-5 bg-gray-50 border-b">
                 Medal History
             </h3>
+
+            {% if user.is_superuser %}
+                <div class="p-4 border-b">
+                    <a href="{% url 'profil_atlet:create_medali' atlet.pk %}" 
+                       class="w-full block text-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 text-sm font-medium">
+                       + Add New Medal
+                    </a>
+                </div>
+            {% endif %}
+            
             <ul class="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+
                 {% for medali in medali_list %}
                     <li class="px-6 py-4">
-                        <strong class="text-gray-800">{{ medali.medal_type }}</strong> 
-                        <span class="text-sm text-gray-500">({{ medali.medal_date }})</span>
-                        <br>
-                        <small class="text-gray-600">{{ medali.event }}</small>
+                        <div>
+                            <strong class="text-gray-800">{{ medali.medal_type }}</strong> 
+                            <span class="text-sm text-gray-500">({{ medali.medal_date|default:"-" }})</span>
+                            <br>
+                            <small class="text-gray-600">{{ medali.event }}</small>
+                        </div>
+
+                        {% if user.is_superuser %}
+                            <div class="flex gap-2 mt-3">
+                                <a href="{% url 'profil_atlet:update_medali' medali.pk %}"
+                                   class="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-md text-xs font-medium hover:bg-yellow-500">
+                                   Edit
+                                </a>
+                                <a href="{% url 'profil_atlet:delete_medali' medali.pk %}"
+                                   class="bg-red-500 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-red-600">
+                                   Delete
+                                </a>
+                            </div>
+                        {% endif %}
                     </li>
                 {% empty %}
                     <li class="px-6 py-4 text-gray-500 italic">No medal history yet.</li>

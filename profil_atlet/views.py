@@ -1,14 +1,15 @@
 # ini utk file viewsnya profil_atlet/views.py
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import Atlet
-from .forms import AtletForm # import form 
+from .models import Atlet, Medali
+from .forms import AtletForm, MedaliForm # import form 
 from django.db.models import Count, Q
 from django.db.models.functions import Lower
 from django.http import JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
+from django.urls import reverse
 
 # fungsi cek Admin 
 # utk jadi Admin harus dipastikan punya status 'is_superuser' 
@@ -71,7 +72,8 @@ def create_atlet(request):
     form = AtletForm()
     context = {
         'form': form,
-        'page_title': 'Tambah Atlet'
+        'page_title': 'Tambah Atlet',
+        'back_url': reverse('profil_atlet:list_atlet')
     }
     return render(request, 'profil_atlet/form_atlet.html', context)
 
@@ -87,7 +89,7 @@ def update_atlet(request, pk):
     else:
         form = AtletForm(instance=atlet)
         
-    context = {'form': form, 'page_title': 'Edit Atlet'}
+    context = {'form': form, 'page_title': 'Edit Atlet', 'back_url': reverse('profil_atlet:detail_atlet', args=[atlet.pk])}
     return render(request, 'profil_atlet/form_atlet.html', context)
 
 # D (Delete) only Admin
@@ -161,3 +163,65 @@ def delete_atlet_ajax(request, pk):
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
     return JsonResponse({"status": "error", "message": "Method is not allowed"}, status=405)
+
+# C (Create) untuk Medali
+@user_passes_test(is_admin)
+def create_medali(request, atlet_pk):
+    atlet = get_object_or_404(Atlet, pk=atlet_pk)
+    
+    if request.method == 'POST':
+        form = MedaliForm(request.POST)
+        if form.is_valid():
+            medali = form.save(commit=False)
+            medali.atlet = atlet
+            medali.save()
+            return redirect('profil_atlet:detail_atlet', pk=atlet_pk)
+    else:
+        form = MedaliForm()
+
+    context = {
+        'form': form, 
+        'atlet': atlet, 
+        'page_title': 'Add Medal',
+        'back_url': reverse('profil_atlet:detail_atlet', args=[atlet_pk])
+    }
+    return render(request, 'profil_atlet/form_atlet.html', context)
+
+# U (Update) untuk Medali
+@user_passes_test(is_admin)
+def update_medali(request, medal_pk):
+    medali = get_object_or_404(Medali, pk=medal_pk)
+    
+    if request.method == 'POST':
+        form = MedaliForm(request.POST, instance=medali)
+        if form.is_valid():
+            form.save()
+            return redirect('profil_atlet:detail_atlet', pk=medali.atlet.pk)
+    else:
+        form = MedaliForm(instance=medali)
+
+    context = {
+        'form': form, 
+        'atlet': medali.atlet, 
+        'page_title': 'Edit Medal',
+        'back_url': reverse('profil_atlet:detail_atlet', args=[medali.atlet.pk])
+    }
+    return render(request, 'profil_atlet/form_atlet.html', context)
+
+# D (Delete) untuk Medali
+@user_passes_test(is_admin)
+def delete_medali(request, medal_pk):
+    medali = get_object_or_404(Medali, pk=medal_pk)
+    atlet_pk = medali.atlet.pk # Simpan PK atlet sebelum dihapus
+    
+    if request.method == 'POST':
+        medali.delete()
+        return redirect('profil_atlet:detail_atlet', pk=atlet_pk)
+    
+    # Kita akalin 'confirm_delete.html' biar generik
+    context = {
+        'object': medali,
+       'object_name': f"Medal: {medali.event} ({medali.medal_date})",
+        'back_url': reverse('profil_atlet:detail_atlet', args=[atlet_pk])
+    }
+    return render(request, 'profil_atlet/confirm_delete.html', context)

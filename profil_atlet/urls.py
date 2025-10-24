@@ -16,4 +16,8 @@ urlpatterns = [
     path('json/', views.show_json_atlet, name='show_json_atlet'),
     path('create-ajax/', views.create_atlet_ajax, name='create_atlet_ajax'),
     path('delete-ajax/<int:pk>/', views.delete_atlet_ajax, name='delete_atlet_ajax'),
+    
+    path('<int:atlet_pk>/add_medal/', views.create_medali, name='create_medali'),
+    path('update_medal/<int:medal_pk>/', views.update_medali, name='update_medali'),
+    path('delete_medal/<int:medal_pk>/', views.delete_medali, name='delete_medali'),
 ]
