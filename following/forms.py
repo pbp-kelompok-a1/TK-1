@@ -10,4 +10,5 @@ class FollowingForm(forms.ModelForm):
 class OlahragaForm(forms.ModelForm):
     class Meta:
         model = CabangOlahraga
-        fields = '__all__'
+        fields = ['name']
+        widgets = {'cabangOnamelahraga': forms.CharField}

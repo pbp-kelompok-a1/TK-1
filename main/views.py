@@ -53,3 +53,6 @@ def show_main(request):
         'last_login': request.COOKIES.get('last_login', 'Never')
     }
     return render(request, "main.html", context)
+
+def errorPage(request):
+    return render(request, "error.html")
