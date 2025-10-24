@@ -1,60 +1,157 @@
 {% load static %}
 
-<nav class="bg-[#3BC3FD] flex items-center justify-between px-8 py-3 shadow-md">
+<nav class="bg-[#3BC3FD] flex items-center justify-between px-4 md:px-8 py-3 shadow-md relative">
   <!-- Left: Logo -->
-<div class="flex items-center space-x-3">
-  <a href="{% url 'main:show_main' %}" class="flex items-center space-x-3">
-    <img src="{% static 'images/logo2.png' %}" alt="ParaWorld Logo" class="h-16 w-auto" style="background: transparent;" />
-    <span class="text-[#f5f1ce] text-4xl font-semibold tracking-wide">PARAWORLD</span>
-  </a>
-</div>
 
-  <!-- Middle: Menu Links -->
-  <div class="flex space-x-10 text-black font-bold text-lg ml-auto mr-14">
-    <a href="{% url 'main:show_main' %}" class="hover:text-white transition">HOME</a>
-    <a href="#" class=" hover:text-white transition">NEWS</a>
-    <a href="{% url 'profil_atlet:list_atlet' %}" class="hover:text-white transition">ATHLETES</a>
-    <a href="{% url 'event:event_list' %}" class="hover:text-white transition">EVENT</a>
+  <div class="flex items-center space-x-2 md:space-x-3">
+    <a href="{% url 'main:show_main' %}" class="flex items-center space-x-2 md:space-x-3">
+      <img src="{% static 'images/logo2.png' %}" alt="ParaWorld Logo" class="h-12 md:h-16 w-auto" style="background: transparent;" />
+      <span class="text-[#f5f1ce] text-2xl md:text-4xl font-semibold tracking-wide">PARAWORLD</span>
+    </a>
   </div>
 
-  <!-- Right: Profile Icon -->
-  <div class="relative">
-    <a id="profile-btn" href="{% url 'profile' user.id %}">
-      <img
-        src="{% static 'images/profile.png' %}"
-        alt="Profile Icon"
-        class="h-12 w-12 rounded-full bg-gray-100 object-cover border border-white"
-      />
-    </a>
+  <!-- Hamburger Button (Mobile Only) -->
+  <button id="hamburger-btn" class="md:hidden text-white focus:outline-none z-50">
+    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+    </svg>
+  </button>
 
-    <!-- Popup -->
-    <div id="profile-popup"
-         class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
-      <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Profile</a>
-      <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Settings</a>
-      <hr class="my-1">
-      <a href="{% url 'main:logout' %}" class="block px-4 py-2 text-red-600 hover:bg-gray-100">Logout</a>
+  <!-- Mobile Menu (Hidden by default) -->
+  <div id="mobile-menu" class="hidden md:hidden absolute top-full left-0 right-0 bg-[#3BC3FD] shadow-lg z-40">
+    <div class="flex flex-col py-4 px-4">
+      {% if request.user.is_authenticated %}
+        <!-- Profile Section in Mobile Menu -->
+        <div class="flex items-center space-x-3 px-4 py-3 mb-2 border-b border-white/20">
+          <img
+            src="{% static 'images/profile.png' %}"
+            alt="Profile Icon"
+            class="h-12 w-12 rounded-full bg-gray-100 object-cover border-2 border-white"
+          />
+          <div class="text-white">
+            <p class="font-bold">{{ request.user.username }}</p>
+            <p class="text-sm text-[#f5f1ce]">View Profile</p>
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Menu Links -->
+      <div class="flex flex-col space-y-1 text-white font-bold text-lg">
+        <a href="{% url 'main:show_main' %}" class="hover:bg-sky-600 px-4 py-3 rounded transition">HOME</a>
+        <a href="{% url 'news:berita_list' %}" class="hover:bg-sky-600 px-4 py-3 rounded transition">NEWS</a>
+        <a href="{% url 'profil_atlet:list_atlet' %}" class="hover:bg-sky-600 px-4 py-3 rounded transition">ATHLETES</a>
+        <a href="#" class="hover:bg-sky-600 px-4 py-3 rounded transition">EVENT</a>
+        
+        {% if request.user.is_authenticated %}
+          <hr class="my-2 border-white/20">
+          <a href="{% url 'main:logout' %}" class="hover:bg-sky-600 text-red-600 px-4 py-3 rounded transition font-semibold">
+            Logout
+          </a>
+        {% else %}
+          <a href="{% url 'main:login' %}" class="bg-white text-[#3BC3FD] text-center px-4 py-3 rounded-lg hover:bg-gray-200 transition mt-2">
+            Login
+          </a>
+        {% endif %}
+      </div>
     </div>
+  </div>
+
+  <!-- Desktop Menu (Hidden on Mobile) -->
+  <div class="hidden md:flex space-x-10 text-white font-bold text-lg ml-auto mr-14">
+    <a href="{% url 'main:show_main' %}" class="hover:text-sky-700 transition">HOME</a>
+    <a href="{% url 'news:berita_list' %}" class="hover:text-sky-700 transition">NEWS</a>
+    <a href="{% url 'profil_atlet:list_atlet' %}" class="hover:text-sky-700 transition">ATHLETES</a>
+    <a href="{% url 'event:event_list' %}" class="hover:text-sky-700 transition">EVENT</a>
+  </div>
+
+  <!-- Right: Profile Icon (Desktop Only) -->
+  <div class="relative hidden md:block">
+    {% if request.user.is_authenticated %}
+      <!-- Profile Icon -->
+      <button id="profile-btn">
+        <img
+          src="{% static 'images/profile.png' %}"
+          alt="Profile Icon"
+          class="h-12 w-12 rounded-full bg-gray-100 object-cover border border-white"
+        />
+      </button>
+
+      <!-- Popup Menu Only When Logged In -->
+      <div id="profile-popup"
+          class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+        <a href="#" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Profile</a>
+        <hr class="my-1">
+        <a href="{% url 'main:logout' %}" class="block px-4 py-2 text-red-600 hover:bg-gray-100 font-semibold">
+          Logout
+        </a>
+      </div>
+
+    {% else %}
+      <!-- If Not Logged In → Show Login Button -->
+      <a href="{% url 'main:login' %}"
+         class="px-8 py-3 bg-white text-[#3BC3FD] font-bold rounded-lg hover:bg-gray-200 transition">
+        Login
+      </a>
+    {% endif %}
   </div>
 </nav>
 
 <script>
-  // Simple toggle popup
   document.addEventListener("DOMContentLoaded", () => {
+    // Hamburger menu toggle
+    const hamburgerBtn = document.getElementById("hamburger-btn");
+    const mobileMenu = document.getElementById("mobile-menu");
+    const hamburgerIcon = document.getElementById("hamburger-icon");
+    const closeIcon = document.getElementById("close-icon");
+
+    if (hamburgerBtn) {
+      hamburgerBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        mobileMenu.classList.toggle("hidden");
+        hamburgerIcon.classList.toggle("hidden");
+        closeIcon.classList.toggle("hidden");
+      });
+    }
+
+    // Desktop profile popup
     const profileBtn = document.getElementById("profile-btn");
     const popup = document.getElementById("profile-popup");
 
-    profileBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      popup.classList.toggle("hidden");
+    if (profileBtn && popup) {
+      profileBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        popup.classList.toggle("hidden");
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!popup.contains(e.target)) {
+          popup.classList.add("hidden");
+        }
+      });
+    }
+
+    // Close mobile menu when clicking outside
+    document.addEventListener("click", (e) => {
+      if (mobileMenu && !mobileMenu.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+        mobileMenu.classList.add("hidden");
+        if (hamburgerIcon && closeIcon) {
+          hamburgerIcon.classList.remove("hidden");
+          closeIcon.classList.add("hidden");
+        }
+      }
     });
 
-    // Klik di luar popup -> popup tertutup
-    document.addEventListener("click", (e) => {
-      if (!popup.contains(e.target)) {
-        popup.classList.add("hidden");
-      }
+    // Close mobile menu when clicking a link
+    const mobileMenuLinks = mobileMenu?.querySelectorAll("a");
+    mobileMenuLinks?.forEach(link => {
+      link.addEventListener("click", () => {
+        mobileMenu.classList.add("hidden");
+        if (hamburgerIcon && closeIcon) {
+          hamburgerIcon.classList.remove("hidden");
+          closeIcon.classList.add("hidden");
+        }
+      });
     });
   });
 </script>
-
