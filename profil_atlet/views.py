@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Atlet
 from .forms import AtletForm # import form 
 from django.db.models import Count, Q
+from django.db.models.functions import Lower
 from django.http import JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
@@ -33,7 +34,7 @@ def list_atlet(request):
     if request.user.is_authenticated and request.user.is_superuser:
         atlet_list = base_query.order_by('name') # Admin lihat semua
     else:
-        atlet_list = base_query.filter(is_visible=True).order_by('name') # lainnya lihat yg visible
+        atlet_list = base_query.filter(is_visible=True).order_by(Lower('name')) # lainnya lihat yg visible
         
     context = {'atlet_list': atlet_list}
     return render(request, 'profil_atlet/list_atlet.html', context)
@@ -110,9 +111,9 @@ def show_json_atlet(request):
     )
 
     if request.user.is_authenticated and request.user.is_superuser:
-        atlet_list = base_query.order_by('name')
+        atlet_list = base_query.order_by(Lower('name'))
     else:
-        atlet_list = base_query.filter(is_visible=True).order_by('name')
+        atlet_list = base_query.filter(is_visible=True).order_by(Lower('name'))
         
     data = []
     for atlet in atlet_list:
