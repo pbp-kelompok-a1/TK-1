@@ -7,10 +7,12 @@ from django.contrib.auth.decorators import login_required
 from .models import Event, EventType 
 from .forms import EventForm
 
-from following.views import getListOfEvents
+from following.views import getListOfEvents, createSportOnStart
 
 # Create your views here.
 def event_list(request):
+    createSportOnStart()
+    
     user_is_logged_in = request.user.is_authenticated
     is_admin = request.user.is_staff
 
