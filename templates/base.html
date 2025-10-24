@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     {% block meta %} {% endblock meta %}
@@ -34,7 +35,7 @@
         const toastMessage = document.getElementById('toast-message');
 
         function showToast(message, isError = false) {
-            toastMessage.innerText = message;
+            toastMessage.innerText = DOMPurify.sanitize(message);
             
             // beda warna berdasarkan status (error or sukses)
             if (isError) {
@@ -66,8 +67,8 @@
 
         // fungsi utk tampilin modal
         function showModal(title, bodyHtml) {
-            modalTitle.innerText = title;
-            modalBody.innerHTML = bodyHtml;
+            modalTitle.innerText = DOMPurify.sanitize(title);
+            modalBody.innerHTML = DOMPurify.sanitize(bodyHtml);
 
             modalBackdrop.classList.remove('hidden');
             setTimeout(() => { // jeda 
