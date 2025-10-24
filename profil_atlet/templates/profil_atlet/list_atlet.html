@@ -55,6 +55,12 @@
 
     // fungsi utk buat 1 card atlet 
     function createAthleteCard(atlet) {
+    
+    const cleanName = DOMPurify.sanitize(atlet.name);
+    const cleanDiscipline = DOMPurify.sanitize(atlet.discipline);
+    const cleanCountry = DOMPurify.sanitize(atlet.country);
+    const cleanShortName = DOMPurify.sanitize(atlet.short_name || ''); // (|| '' untuk jaga2 jika datanya null)
+
     const medals = `
         <div class="mt-5 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200/40 overflow-hidden">
         <table class="w-full text-center text-sm">
@@ -93,7 +99,7 @@
             <div class="flex gap-2">
             <a href="/atlet/update/${atlet.pk}/" 
                 class="bg-yellow-300 text-yellow-900 px-3 py-1 rounded-md hover:bg-yellow-400 font-medium transition-all">Edit</a>
-            <button data-pk="${atlet.pk}" data-name="${atlet.name}" 
+            <button data-pk="${atlet.pk}" data-name="${cleanName}" 
                 class="btn-delete-atlet bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 font-medium transition-all">Delete</button>
             </div>
         </div>`
@@ -106,15 +112,15 @@
         <!-- utk discipline & ID -->
         <div class="flex justify-between items-center mb-2">
             <span class="text-xs font-bold uppercase tracking-widest bg-gradient-to-r from-blue-100 to-cyan-100 px-3 py-1 rounded-full border border-blue-200 text-blue-600">
-            ${atlet.discipline}
+            ${cleanDiscipline}
             </span>
             <span class="text-sm text-blue-500 font-semibold">#${atlet.pk}</span>
         </div>
 
         <!-- Name -->
         <h2 class="text-2xl font-bold text-blue-700 leading-tight">
-            ${atlet.name}
-            ${atlet.short_name ? `<span class="text-base text-blue-400 font-medium ml-1">(${atlet.short_name})</span>` : ''}
+            ${cleanName}
+            ${cleanShortName ? `<span class="text-base text-blue-400 font-medium ml-1">(${cleanShortName})</span>` : ''}
         </h2>
 
         <!-- Country -->
@@ -122,7 +128,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
             </svg>
-            <span>${atlet.country}</span>
+            <span>${cleanCountry}</span>
         </div>
 
         <!-- Medals -->
