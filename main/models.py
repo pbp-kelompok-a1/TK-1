@@ -9,6 +9,7 @@ import uuid
 class CustomUser(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, primary_key=True, on_delete=models.CASCADE, editable=False)
+    join_date = models.DateTimeField(default=timezone.now, editable=False)
     username = models.CharField(max_length=100, editable=False)
     name = models.TextField(null=True, editable=True)
     picture = models.ImageField(default=None, null=True, editable=True)
