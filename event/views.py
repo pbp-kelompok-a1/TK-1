@@ -7,7 +7,7 @@ from django.views.decorators.http import require_POST
 
 from .models import Event, EventType
 from .forms import EventForm
-from following.views import getListOfEvents, createSportOnStart
+from following.views import getListOfEvents
 
 def event_list(request):
     user_is_logged_in = request.user.is_authenticated
