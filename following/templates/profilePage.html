@@ -76,6 +76,7 @@
 </style>
 
 <div class="profile-container">
+    {% csrf_token %}
     <div class="profile-card">
         <div class="profile-header">
             <!-- Profile Picture with Upload -->
@@ -141,7 +142,6 @@
         <div class="add-sport-form">
             <h3 style="margin-bottom: 15px;">Add New Sport</h3>
             <form id="follow-form">
-                {% csrf_token %}
                 <div class="form-group">
                     <label>Select a sport to follow:</label>
                     <div class="radio-group">
