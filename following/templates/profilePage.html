@@ -414,6 +414,7 @@
                 <div class="activity-item">
                     <span class="activity-username">@{{ username }}</span>
                     <span class="activity-text"> made a comment</span>
+                    <a href="{% url 'news:berita_detail' activity.object.id %}" class="activity-link">{{ activity.object.title }}</a>
                 </div>
             {% endif %}
             {% endfor %}
