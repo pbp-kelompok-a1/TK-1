@@ -71,9 +71,12 @@
       <!-- Profile Icon -->
       <button id="profile-btn">
         <img
-          src="{% static 'images/profile.png' %}"
-          alt="Profile Icon"
-          class="h-12 w-12 rounded-full bg-gray-100 object-cover border border-white"
+          src="{% if request.user.customuser.picture %}
+                {{ request.user.customuser.picture.url }}
+              {% else %}
+                {% static 'images/profile.png' %}
+              {% endif %}"
+          class="h-12 w-12 rounded-full object-cover border-2 border-white"
         />
       </button>
 
