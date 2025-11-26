@@ -13,6 +13,7 @@ from event.models import Event
 from profil_atlet.models import Atlet
 
 from .models import CustomUser
+from .forms import CustomUserUpdateForm
 
 def register(request):
     form = UserCreationForm()
@@ -21,7 +22,7 @@ def register(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            newUser = CustomUser(user=user, username=user.username, name=user.username)
+            newUser = CustomUser(user=user, username=user.username, name=user.username, join_date=datetime.datetime.now())
             newUser.save()
             messages.success(request, 'Your account has been successfully created!')
             return redirect('main:login')
@@ -68,3 +69,16 @@ def show_main(request):
 def errorPage(request):
     return render(request, "error.html")
 
+@login_required
+def update_atlet(request, pk):
+    customUser = get_object_or_404(CustomUser, pk=pk)
+    if request.method == 'POST':
+        form = CustomUserUpdateForm(request.POST, instance=customUser)
+        if form.is_valid():
+            form.save()
+            return redirect('profil_atlet:detail_atlet', pk=customUser.pk) 
+    else:
+        form = CustomUserUpdateForm(instance=customUser)
+        
+    context = {'form': form, 'back_url': reverse('profil_atlet:detail_atlet', args=[customUser.pk])}
+    return render(request, 'profil_atlet/form_atlet.html', context)
