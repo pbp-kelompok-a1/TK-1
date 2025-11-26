@@ -6,6 +6,7 @@
 import csv
 from django.core.management.base import BaseCommand
 from profil_atlet.models import Atlet, Medali
+from following.models import CabangOlahraga
 from django.db import IntegrityError
 
 class Command(BaseCommand):
@@ -54,16 +55,25 @@ class Command(BaseCommand):
                     try:
                         tgl_lahir = row.get('birth_date') or None
                         
+                        # 1. ambil nama olahraga dari CSV dulu
+                        discipline_str = row['discipline']
+                        
+                        # 2. cari/bikin object CabangOlahraga
+                        cabor_obj, created = CabangOlahraga.objects.get_or_create(name=discipline_str)
+                        
                         Atlet.objects.create(
                             short_name=row['short_name'],
                             name=row['name'],
                             country=row['country'],
-                            discipline=row['discipline'],
+                            
+                            # 3. masukkan OBJECT tadi
+                            discipline=cabor_obj, 
+                            
                             gender=row.get('gender') or None,
                             birth_date=tgl_lahir,
                             birth_place=row.get('birth_place') or None,
                             birth_country=row.get('birth_country') or None,
-                            nationality=row['country'], # isi nationality dari country jadi nationality = country
+                            nationality=row['country'], 
                             is_visible=True,
                         )
                     except IntegrityError:
