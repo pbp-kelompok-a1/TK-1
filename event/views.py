@@ -10,8 +10,6 @@ from .forms import EventForm
 from following.views import getListOfEvents, createSportOnStart
 
 def event_list(request):
-    createSportOnStart()
-    
     user_is_logged_in = request.user.is_authenticated
     is_admin = request.user.is_staff
 
