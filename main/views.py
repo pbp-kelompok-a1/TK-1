@@ -11,7 +11,6 @@ import datetime
 from news.models import Berita
 from event.models import Event
 from profil_atlet.models import Atlet
-from following.views import createSportOnStart
 
 from .models import CustomUser
 from .forms import CustomUserUpdateForm
@@ -39,7 +38,6 @@ def login_user(request):
             login(request, user)
             response = HttpResponseRedirect(reverse("main:show_main"))
             response.set_cookie('last_login', str(datetime.datetime.now()))
-            createSportOnStart()
             return response
         else:
             messages.error(request, 'Invalid username or password. Please try again.')
@@ -55,7 +53,7 @@ def logout_user(request):
     return response
 
 def show_main(request):
-    createSportOnStart()
+
     # Ambil 3–5 berita terbaru
     top_news = Berita.objects.all().order_by('-id')[:10]
     upcoming_events = Event.objects.filter(start_time__gte=timezone.now()).order_by('start_time')[:10]
