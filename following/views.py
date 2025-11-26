@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from .models import Following, CabangOlahraga
 from .forms import FollowingForm, OlahragaForm
 from main.models import CustomUser
+from main.forms import CustomUserUpdateForm
 from event.models import Event
 from news.models import Berita
 from comment.models import Comment
@@ -94,78 +95,6 @@ def getListOfNews(user):
     return (Berita.objects.annotate(is_followed=Exists(followed_sports)).order_by('-is_followed', '-created_at'))
 
 @login_required
-def profilePage(request, userId):
-    createSportOnStart()
-    if request.method == "POST" and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        form = FollowingForm(request.POST)
-        if form.is_valid():
-            follow = form.save(commit=False)
-            follow.user = request.user
-            follow.save()
-            
-            return JsonResponse({
-                'success': True,
-                'follow_id': follow.id,
-                'sport_id': follow.cabangOlahraga.id,
-                'sport_name': follow.cabangOlahraga.name
-            }, status=201)
-        else:
-            return JsonResponse({
-                'success': False,
-                'error': 'Invalid form data'
-            }, status=400)
-    elif request.method == "POST":
-        form = FollowingForm(request.POST)
-        if form.is_valid():
-            follow = form.save(commit=False)
-            follow.user = request.user
-            follow.save()
-
-            return redirect('following:profile')
-    else:
-        form = FollowingForm()
-        already_chosen = Following.objects.filter(user=request.user).values_list('cabangOlahraga', flat=True)
-        form.fields['cabangOlahraga'].queryset = CabangOlahraga.objects.exclude(id__in=already_chosen)
-        
-        currentUser = CustomUser.objects.filter(user = request.user)
-        profilePicture = currentUser.picture if hasattr(currentUser, 'picture') else None
-        name = currentUser.name if hasattr(currentUser, 'name') else request.user.username
-        username = currentUser.username if hasattr(currentUser, 'username') else request.user.username
-        
-        following = Following.objects.all().filter(user = request.user)
-        comment = Comment.objects.filter(user=request.user)
-        event = Event.objects.filter(creator=request.user)
-        news = Berita.objects.filter(author=request.user)
-
-        threeRecentActivity = list(comment) + list(event)
-        threeRecentActivity.sort(key=lambda x: x.created_at, reverse=True)
-        threeRecentActivity = threeRecentActivity[:3]
-        recentActivity = []
-        for activity in threeRecentActivity:
-            recentActivity.append({
-                "object": activity,
-                "type": activity.__class__.__name__,
-            })
-
-        followingCount = Following.objects.filter(user=request.user).count()
-        commentCount = Comment.objects.filter(user=request.user).count()
-        eventCount = Event.objects.filter(creator=request.user).count()
-        is_admin = request.user.is_superuser
-
-        return render(request, "profilePage.html", {
-            "form": form,
-            "profilePicture": profilePicture,
-            "name": name,
-            "username": username,
-            "following": following,
-            "followingCount": followingCount,
-            "commentCount": commentCount,
-            "eventCount": eventCount,
-            "is_admin": is_admin,
-            "recentActivity": recentActivity
-        }, status=200)
-
-@login_required
 @require_POST
 @csrf_exempt
 def unfollow(request, follow_id):
@@ -202,3 +131,123 @@ def createCabangOlahraga(request):
         if (form.is_valid()):
             form.save()
             return redirect('main:show_main')
+        
+@login_required
+def profilePage(request, userId):
+    createSportOnStart()
+    
+    # Handle profile picture/name update (AJAX)
+    if request.method == "POST" and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Check if it's a CustomUser update request
+        if 'update_profile' in request.POST or request.FILES:
+            try:
+                custom_user = CustomUser.objects.get(user=request.user)
+                form = CustomUserUpdateForm(request.POST, request.FILES, instance=custom_user)
+                
+                if form.is_valid():
+                    updated_user = form.save()
+                    
+                    return JsonResponse({
+                        'success': True,
+                        'message': 'Profile updated successfully',
+                        'data': {
+                            'name': updated_user.name,
+                            'picture': updated_user.picture.url if updated_user.picture else None
+                        }
+                    }, status=200)
+                else:
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Validation failed',
+                        'errors': form.errors
+                    }, status=400)
+            except CustomUser.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'User profile not found'
+                }, status=404)
+        
+        # Handle following sport (existing code)
+        form = FollowingForm(request.POST)
+        if form.is_valid():
+            follow = form.save(commit=False)
+            follow.user = request.user
+            follow.save()
+            
+            return JsonResponse({
+                'success': True,
+                'follow_id': str(follow.id),
+                'sport_id': str(follow.cabangOlahraga.id),
+                'sport_name': follow.cabangOlahraga.name
+            }, status=201)
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid form data'
+            }, status=400)
+    
+    elif request.method == "POST":
+        # Handle non-AJAX POST
+        form = FollowingForm(request.POST)
+        if form.is_valid():
+            follow = form.save(commit=False)
+            follow.user = request.user
+            follow.save()
+            return redirect('profile', userId=userId)
+    
+    else:
+        # GET request - display profile
+        form = FollowingForm()
+        already_chosen = Following.objects.filter(user=request.user).values_list('cabangOlahraga', flat=True)
+        form.fields['cabangOlahraga'].queryset = CabangOlahraga.objects.exclude(id__in=already_chosen)
+        
+        # Get or create CustomUser
+        try:
+            currentUser = CustomUser.objects.get(user=request.user)
+        except CustomUser.DoesNotExist:
+            currentUser = CustomUser.objects.create(
+                user=request.user,
+                username=request.user.username,
+                name=request.user.username
+            )
+        
+        profilePicture = currentUser.picture if currentUser.picture else None
+        name = currentUser.name if currentUser.name else request.user.username
+        username = currentUser.username
+        
+        following = Following.objects.all().filter(user=request.user)
+        comment = Comment.objects.filter(user=request.user)
+        event = Event.objects.filter(creator=request.user)
+        news = Berita.objects.filter(author=request.user)
+
+        threeRecentActivity = list(comment) + list(event)
+        threeRecentActivity.sort(key=lambda x: x.created_at, reverse=True)
+        threeRecentActivity = threeRecentActivity[:3]
+        recentActivity = []
+        for activity in threeRecentActivity:
+            recentActivity.append({
+                "object": activity,
+                "type": activity.__class__.__name__,
+            })
+
+        followingCount = Following.objects.filter(user=request.user).count()
+        commentCount = Comment.objects.filter(user=request.user).count()
+        eventCount = Event.objects.filter(creator=request.user).count()
+        is_admin = request.user.is_superuser
+        
+        # Profile update form
+        profile_form = CustomUserUpdateForm(instance=currentUser)
+
+        return render(request, "profilePage.html", {
+            "form": form,
+            "profile_form": profile_form,
+            "profilePicture": profilePicture,
+            "name": name,
+            "username": username,
+            "following": following,
+            "followingCount": followingCount,
+            "commentCount": commentCount,
+            "eventCount": eventCount,
+            "is_admin": is_admin,
+            "recentActivity": recentActivity
+        }, status=200)
