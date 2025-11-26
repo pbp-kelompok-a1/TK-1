@@ -9,270 +9,107 @@
 {% include 'navbar.html' %}
 
 <style>
-    .profile-container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 20px;
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 20px;
+    /* ... keep all existing styles ... */
+    
+    /* NEW: Edit mode styles */
+    .edit-mode {
+        display: none;
     }
-
-    .profile-card, .sidebar-card {
-        background: #FFFFFF;
-        border-radius: 12px;
-        padding: 30px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    
+    .edit-mode.active {
+        display: block;
     }
-
-    .profile-header {
-        display: flex;
-        gap: 30px;
-        margin-bottom: 30px;
+    
+    .view-mode.editing {
+        display: none;
     }
-
-    .profile-picture {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        background-color: #E5E0DA;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
+    
+    .profile-edit-button {
+        background-color: #38BDF8;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        margin-top: 10px;
     }
-
-    .profile-picture img {
+    
+    .profile-edit-button:hover {
+        background-color: #2BA5E0;
+    }
+    
+    .profile-picture-upload {
+        position: relative;
+        cursor: pointer;
+    }
+    
+    .profile-picture-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
         height: 100%;
-        object-fit: cover;
-    }
-
-    .profile-info h1 {
-        font-size: 32px;
-        margin-bottom: 8px;
-    }
-
-    .username {
-        color: #333;
-        font-size: 18px;
-        margin-bottom: 12px;
-    }
-
-    .bio {
-        color: #333;
-        line-height: 1.6;
-    }
-
-    .stats {
-        display: flex;
-        gap: 60px;
-        margin-bottom: 40px;
-        padding-bottom: 30px;
-        border-bottom: 1px solid #e0e0e0;
-    }
-
-    .stat {
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        color: white;
+        font-size: 12px;
         text-align: center;
     }
-
-    .stat-number {
-        font-size: 32px;
-        font-weight: bold;
-        color: #333;
-    }
-
-    .stat-label {
-        color: #333;
-        font-size: 14px;
-        margin-top: 4px;
-    }
-
-    .section-title {
-        font-size: 24px;
-        margin-bottom: 20px;
-        color: #333;
-    }
-
-    .sports-container {
+    
+    .profile-picture-upload:hover .profile-picture-overlay {
         display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 40px;
     }
-
-    .sport-tag {
-        background-color: #38BDF8;
-        color: white;
-        padding: 10px 16px;
-        border-radius: 20px;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .sport-tag button {
-        background: none;
-        border: none;
-        color: white;
-        cursor: pointer;
-        font-size: 18px;
-        padding: 0;
-        display: flex;
-        align-items: center;
-    }
-
-    .sport-tag button:hover {
-        opacity: 0.8;
-    }
-
-    .activity-item {
-        padding: 15px 0;
-        border-bottom: 1px solid #f0f0f0;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .activity-item:last-child {
-        border-bottom: none;
-    }
-
-    .activity-dot {
-        width: 8px;
-        height: 8px;
-        background-color: #38BDF8;
-        border-radius: 50%;
-        flex-shrink: 0;
-    }
-
-    .activity-username {
-        font-weight: 600;
-        color: #333;
-    }
-
-    .activity-text {
-        color: #333;
-    }
-
-    .activity-link {
-        color: #38BDF8;
-        text-decoration: none;
-    }
-
-    .activity-link:hover {
-        text-decoration: underline;
-    }
-
-    .user-info {
-        margin-bottom: 20px;
-    }
-
-    .info-row {
-        display: flex;
-        margin-bottom: 12px;
-        font-size: 14px;
-    }
-
-    .info-label {
-        font-weight: 600;
-        color: #333;
-        margin-right: 8px;
-    }
-
-    .info-value {
-        color: #333;
-    }
-
-    .button {
+    
+    .name-input {
         width: 100%;
-        padding: 16px;
-        border: none;
+        padding: 8px 12px;
+        border: 2px solid #38BDF8;
         border-radius: 8px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        margin-bottom: 12px;
-        transition: background-color 0.2s;
-    }
-
-    .button-primary {
-        background-color: #38BDF8;
-        color: white;
-    }
-
-    .button-primary:hover {
-        background-color: #38BDF8;
-    }
-
-    .add-sport-form {
-        margin-top: 20px;
-        padding: 20px;
-        background-color: #FFFFFF;
-        border-radius: 8px;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 600;
-        color: #333;
-    }
-
-    .radio-group {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        max-height: 300px;
-        overflow-y: auto;
-    }
-
-    .radio-option {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px;
-        background: white;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-
-    .radio-option:hover {
-        background-color: #FFFFFF;
-    }
-
-    .radio-option input[type="radio"] {
-        cursor: pointer;
-    }
-
-    .radio-option label {
-        margin: 0;
-        cursor: pointer;
-        font-weight: normal;
+        font-size: 18px;
+        margin-top: 8px;
     }
 </style>
 
 <div class="profile-container">
     <div class="profile-card">
         <div class="profile-header">
-            <div class="profile-picture">
+            <!-- Profile Picture with Upload -->
+            <div class="profile-picture profile-picture-upload" id="profile-picture-container">
                 {% if profilePicture %}
-                    <img src="{{ profilePicture.url }}" alt="{{ name }}">
+                    <img id="profile-picture-img" src="{{ profilePicture.url }}" alt="{{ name }}">
                 {% else %}
-                    <svg width="60" height="60" viewBox="0 0 24 24" fill="#999">
+                    <svg id="profile-picture-svg" width="60" height="60" viewBox="0 0 24 24" fill="#999">
                         <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                     </svg>
                 {% endif %}
+                <div class="profile-picture-overlay">
+                    <span>Click to<br>Change Photo</span>
+                </div>
+                <input type="file" id="picture-input" accept="image/*" style="display: none;">
             </div>
+            
             <div class="profile-info">
-                <h1>{{ name }}</h1>
+                <!-- View Mode -->
+                <div class="view-mode" id="name-view-mode">
+                    <h1 id="display-name">{{ name }}</h1>
+                    <button class="profile-edit-button" onclick="enterEditMode()">Edit Profile</button>
+                </div>
+                
+                <!-- Edit Mode -->
+                <div class="edit-mode" id="name-edit-mode">
+                    <input type="text" id="name-input" class="name-input" value="{{ name }}" placeholder="Enter your name">
+                    <div style="margin-top: 10px;">
+                        <button class="profile-edit-button" onclick="saveProfile()" style="background-color: #10b981;">Save</button>
+                        <button class="profile-edit-button" onclick="cancelEdit()" style="background-color: #ef4444; margin-left: 8px;">Cancel</button>
+                    </div>
+                </div>
+                
                 <div class="username">@{{ username }}</div>
-                <p class="bio">{{ bio }}</p>
             </div>
         </div>
 
@@ -329,11 +166,10 @@
                     <span class="activity-text"> posted an event: </span>
                     <a href="{% url 'event:event_list' %}" class="activity-link">{{ activity.object.title }}</a>
                 </div>
-            {% else %}
+            {% elif activity.type == 'Comment' %}
                 <div class="activity-item">
                     <span class="activity-username">@{{ username }}</span>
-                    <span class="activity-text"> posted news: </span>
-                    <a href="{% url 'news:berita_detail' activity.object.id %}" class="activity-link">{{ activity.object.title }}</a>
+                    <span class="activity-text"> made a comment</span>
                 </div>
             {% endif %}
             {% endfor %}
@@ -346,11 +182,11 @@
             <div class="user-info">
                 <div class="info-row">
                     <span class="info-label">Joined:</span>
-                    <span class="info-value">{{ request.user.join_date|date:"d M Y" }}</span>
+                    <span class="info-value">{{ request.user.date_joined|date:"d M Y" }}</span>
                 </div>
             </div>
             <button class="button button-primary">
-                <a style="margin-top: 30px;" href="{% url 'main:logout' %}">Logout</a>
+                <a style="color: white; text-decoration: none;" href="{% url 'main:logout' %}">Logout</a>
             </button>
         </div>
     </div>
@@ -373,12 +209,164 @@
     }
 
     const csrftoken = getCookie('csrftoken');
+    
+    // Edit Mode Functions
+    function enterEditMode() {
+        document.getElementById('name-view-mode').classList.add('editing');
+        document.getElementById('name-edit-mode').classList.add('active');
+    }
+    
+    function cancelEdit() {
+        document.getElementById('name-view-mode').classList.remove('editing');
+        document.getElementById('name-edit-mode').classList.remove('active');
+        // Reset input to original value
+        document.getElementById('name-input').value = document.getElementById('display-name').textContent.trim();
+    }
+    
+    async function saveProfile() {
+        const newName = document.getElementById('name-input').value.trim();
+        
+        if (!newName) {
+            alert('Name cannot be empty');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('name', newName);
+        formData.append('update_profile', 'true');
+        
+        try {
+            const response = await fetch(window.location.href, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Update display
+                document.getElementById('display-name').textContent = data.data.name;
+                
+                // Exit edit mode
+                document.getElementById('name-view-mode').classList.remove('editing');
+                document.getElementById('name-edit-mode').classList.remove('active');
+                
+                // Show success message
+                showNotification('Profile updated successfully!', 'success');
+            } else {
+                showNotification(data.error || 'Failed to update profile', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('An error occurred. Please try again.', 'error');
+        }
+    }
+    
+    // Profile Picture Upload
+    document.getElementById('profile-picture-container').addEventListener('click', function() {
+        document.getElementById('picture-input').click();
+    });
+    
+    document.getElementById('picture-input').addEventListener('change', async function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            showNotification('Image size must be less than 5MB', 'error');
+            return;
+        }
+        
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            showNotification('Please upload an image file', 'error');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('picture', file);
+        formData.append('update_profile', 'true');
+        
+        // Get current name to preserve it
+        const currentName = document.getElementById('name-input').value || document.getElementById('display-name').textContent.trim();
+        formData.append('name', currentName);
+        
+        try {
+            const response = await fetch(window.location.href, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.data.picture) {
+                // Update profile picture
+                const container = document.getElementById('profile-picture-container');
+                const existingImg = document.getElementById('profile-picture-img');
+                const existingSvg = document.getElementById('profile-picture-svg');
+                
+                if (existingSvg) {
+                    existingSvg.remove();
+                }
+                
+                if (existingImg) {
+                    existingImg.src = data.data.picture;
+                } else {
+                    const img = document.createElement('img');
+                    img.id = 'profile-picture-img';
+                    img.src = data.data.picture;
+                    img.alt = data.data.name;
+                    container.insertBefore(img, container.firstChild);
+                }
+                
+                showNotification('Profile picture updated successfully!', 'success');
+            } else {
+                showNotification(data.error || 'Failed to upload picture', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('An error occurred. Please try again.', 'error');
+        }
+    });
 
     function updateSportsCount() {
         const count = document.querySelectorAll('.sport-tag').length;
         document.getElementById('sports-count').textContent = count;
     }
 
+    // Notification function
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background-color: ${type === 'success' ? '#10b981' : '#ef4444'};
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        `;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    // Following form submission
     document.getElementById('follow-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -414,13 +402,13 @@
 
                 updateSportsCount();
                 e.target.reset();
-                showToast('Sport added successfully!', false);
+                showNotification('Sport added successfully!', 'success');
             } else {
-                showToast(data.error || 'Failed to add sport', true);
+                showNotification(data.error || 'Failed to add sport', 'error');
             }
         } catch (error) {
             console.error('Error:', error);
-            showToast('An error occurred. Please try again.', true);
+            showNotification('An error occurred. Please try again.', 'error');
         }
     });
 
@@ -456,14 +444,41 @@
                 radioGroup.appendChild(radioOption);
 
                 updateSportsCount();
-                showToast('Sport unfollowed successfully!', false);
+                showNotification('Sport unfollowed successfully!', 'success');
             } else {
-                showToast(data.error || 'Failed to unfollow sport', true);
+                showNotification(data.error || 'Failed to unfollow sport', 'error');
             }
         } catch (error) {
             console.error('Error:', error);
-            showToast('An error occurred. Please try again.', true);
+            showNotification('An error occurred. Please try again.', 'error');
         }
     }
+    
+    // CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
 </script>
 {% endblock content %}

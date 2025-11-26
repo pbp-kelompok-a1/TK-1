@@ -5,7 +5,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth import logout as auth_logout
 import json
+import datetime
 
+from main.models import CustomUser
 
 @csrf_exempt
 def login(request):
@@ -59,7 +61,10 @@ def register(request):
         # Create the new user
         user = User.objects.create_user(username=username, password=password1)
         user.save()
-        
+
+        custom_user = CustomUser.objects.create(user=user,username=user.username,name=user.username, join_date=datetime.datetime.now())
+        custom_user.save()
+
         return JsonResponse({
             "username": user.username,
             "status": 'success',
