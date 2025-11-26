@@ -13,73 +13,23 @@ from main.forms import CustomUserUpdateForm
 from event.models import Event
 from news.models import Berita
 from comment.models import Comment
+from profil_atlet.models import Atlet
 
 # Create your views here.
 # For events
 def createSportOnStart():
-    tennis = CabangOlahraga(name="Tennis")
-    swimming = CabangOlahraga(name="Swimming")
-    athletic = CabangOlahraga(name="Athletic")
-    basket = CabangOlahraga(name="Basket")
-    other = CabangOlahraga(name="Other")
+    for profile_atlet in Atlet.objects.all():
+        discipline = profile_atlet.discipline
+        if not CabangOlahraga.objects.filter(name=discipline).exists():
+            CabangOlahraga.objects.create(name=discipline)
 
-    tennisNotCreated = True
-    swimmingNotCreated = True
-    athleticNotCreated = True
-    basketNotCreated = True
-    otherNotCreated = True
-    for sport in CabangOlahraga.objects.all().iterator():
-        if sport.name == tennis.name: tennisNotCreated = False
-        elif sport.name == swimming.name: swimmingNotCreated = False
-        elif sport.name == athletic.name: athleticNotCreated = False
-        elif sport.name == basket.name: basketNotCreated = False
-        elif sport.name == other.name: otherNotCreated = False
-    
-    if (tennisNotCreated): tennis.save()
-    if (swimmingNotCreated): swimming.save()
-    if (athleticNotCreated): athletic.save()
-    if (basketNotCreated): basket.save()
-    if (otherNotCreated): other.save()
-
-    for event in Event.objects.all():
-        if (event.sport_branch == 'tennis'): event.cabangOlahraga = tennis
-        elif (event.sport_branch == 'swim'): event.cabangOlahraga = swimming
-        elif (event.sport_branch == 'atheltic'): event.cabangOlahraga = athletic
-        elif (event.sport_branch == 'basket'): event.cabangOlahraga = basket
-        else: event.cabangOlahraga = other
-
-# For news
-def createSportOnStart2():
-    tennis = CabangOlahraga(name="Tennis")
-    swimming = CabangOlahraga(name="Swimming")
-    athletic = CabangOlahraga(name="Athletic")
-    basket = CabangOlahraga(name="Basket")
-    other = CabangOlahraga(name="Other")
-
-    tennisNotCreated = True
-    swimmingNotCreated = True
-    athleticNotCreated = True
-    basketNotCreated = True
-    otherNotCreated = True
-    for sport in CabangOlahraga.objects.all().iterator():
-        if sport.name == tennis.name: tennisNotCreated = False
-        elif sport.name == swimming.name: swimmingNotCreated = False
-        elif sport.name == athletic.name: athleticNotCreated = False
-        elif sport.name == basket.name: basketNotCreated = False
-        elif sport.name == other.name: otherNotCreated = False
-    
-    if (tennisNotCreated): tennis.save()
-    if (swimmingNotCreated): swimming.save()
-    if (athleticNotCreated): athletic.save()
-    if (basketNotCreated): basket.save()
-    if (otherNotCreated): other.save()
-
-    for news in Berita.objects.all():
-        if ('tennis' in news.title.lower()) or ('tennis' in news.content.lower()): news.cabangOlahraga = tennis
-        elif ('swim' in news.title.lower()) or ('swim' in news.content.lower()): news.cabangOlahraga = swimming
-        elif ('athletic' in news.title.lower()) or ('athletic' in news.content.lower()): news.cabangOlahraga = athletic
-        elif ('basket' in news.title.lower()) or ('basket' in news.content.lower()): news.cabangOlahraga = basket
-        else: news.cabangOlahraga = other
+def checkNewsCabangOlahraga():
+    for berita in Berita.objects.all():
+        for cabor in CabangOlahraga.objects.all():
+            if cabor.name.lower() in berita.title.lower() or cabor.name.lower() in berita.content.lower():
+                berita.cabangOlahraga = cabor
+                berita.save()
+                break
 
 def is_admin(user):
     return user.is_superuser
@@ -90,7 +40,8 @@ def getListOfEvents(user):
     return (Event.objects.annotate(is_followed=Exists(followed_sports)).order_by('-is_followed', '-created_at'))
 
 def getListOfNews(user):
-    createSportOnStart2()
+    createSportOnStart()
+    checkNewsCabangOlahraga()
     followed_sports = Following.objects.all().filter(user=user, cabangOlahraga=OuterRef('cabangOlahraga'))
     return (Berita.objects.annotate(is_followed=Exists(followed_sports)).order_by('-is_followed', '-created_at'))
 
