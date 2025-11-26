@@ -105,7 +105,7 @@ def delete_atlet(request, pk):
 # function view utk  data JSON
 def show_json_atlet(request):
     # kita ambil query yg sama persis dgnview list_atlet
-    base_query = Atlet.objects.annotate(
+    base_query = Atlet.objects.select_related('discipline').annotate(
         gold_count=Count('medali', filter=Q(medali__medal_type='Gold Medal')),
         silver_count=Count('medali', filter=Q(medali__medal_type='Silver Medal')),
         bronze_count=Count('medali', filter=Q(medali__medal_type='Bronze Medal')),
@@ -113,17 +113,18 @@ def show_json_atlet(request):
     )
 
     if request.user.is_authenticated and request.user.is_superuser:
-        atlet_list = base_query.order_by(Lower('name'))
+        atlet_list = base_query.order_by('discipline__name', Lower('name'))
     else:
         atlet_list = base_query.filter(is_visible=True).order_by(Lower('name'))
         
     data = []
     for atlet in atlet_list:
+        nama_discipline = atlet.discipline.name if atlet.discipline else "General"
         data.append({
             'pk': atlet.pk,
             'name': atlet.name,
             'short_name': atlet.short_name,
-            'discipline': atlet.discipline,
+            'discipline': nama_discipline,
             'country': atlet.country,
             'is_visible': atlet.is_visible,
             'gold_count': atlet.gold_count,

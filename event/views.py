@@ -88,3 +88,27 @@ def event_delete(request, event_id):
             return JsonResponse({'success': False, 'message': 'Permission denied.'}, status=403)
         messages.error(request, 'Permission denied.')
         return redirect('event:event_list')  
+    
+@login_required
+def event_edit(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+
+    if request.user != event.creator and not request.user.is_staff:
+        messages.error(request, "You do not have permission to edit this event.")
+        return redirect('event:event_list')
+
+    if request.method == 'POST':
+        form = EventForm(request.POST, instance=event)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Event '{event.title}' updated successfully!")
+            return redirect('event:event_list')
+    else:
+        form = EventForm(instance=event)
+
+    context = {
+        'form': form, 
+        'page_title': f"Edit Event: {event.title}"
+    }
+    
+    return render(request, 'event_create_form.html', context)
