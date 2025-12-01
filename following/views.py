@@ -221,3 +221,14 @@ def getJSONCabangOlahraga(request):
             'name': cabor.name
         })
     return JsonResponse({'cabangOlahraga': data}, status=200) 
+
+def getJSONCustomUser(request):
+    customUser = CustomUser.objects.get(user=request.user)
+    data = {
+        'id': customUser.id,
+        'username': customUser.username,
+        'name': customUser.name,
+        'picture': customUser.picture if customUser.picture else None,
+        'join_date': customUser.join_date
+    }
+    return JsonResponse({'customUser': data}, status=200)
