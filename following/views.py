@@ -202,7 +202,7 @@ def profilePage(request, userId):
         }, status=200)
     
 def getJSONFollowing(request):
-    followings = Following.objects.filter(user=request.user)
+    followings = Following.objects.all()
     data = []
     for follow in followings:
         data.append({
@@ -223,7 +223,7 @@ def getJSONCabangOlahraga(request):
     return JsonResponse({'cabangOlahraga': data}, status=200) 
 
 def getJSONCustomUser(request):
-    customUser = CustomUser.objects.get(user=request.user)
+    customUser = CustomUser.objects.all()
     data = {
         'id': customUser.id,
         'username': customUser.username,
