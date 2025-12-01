@@ -20,4 +20,5 @@ urlpatterns = [
     path('<int:atlet_pk>/add_medal/', views.create_medali, name='create_medali'),
     path('update_medal/<int:medal_pk>/', views.update_medali, name='update_medali'),
     path('delete_medal/<int:medal_pk>/', views.delete_medali, name='delete_medali'),
+    path('json-detail/<int:pk>/', views.show_json_detail_atlet, name='show_json_detail_atlet'),
 ]
