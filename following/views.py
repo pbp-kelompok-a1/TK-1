@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 
 from .models import Following, CabangOlahraga
 from .forms import FollowingForm, OlahragaForm
+
 from main.models import CustomUser
 from main.forms import CustomUserUpdateForm
 from event.models import Event
@@ -14,6 +15,13 @@ from news.models import Berita
 from comment.models import Comment
 
 # Create your views here.
+# For events
+def createSportOnStart():
+    for profile_atlet in Atlet.objects.all():
+        discipline = profile_atlet.discipline
+        if not CabangOlahraga.objects.filter(name=discipline).exists():
+            CabangOlahraga.objects.create(name=discipline)
+
 def checkNewsCabangOlahraga():
     for berita in Berita.objects.all():
         for cabor in CabangOlahraga.objects.all():
@@ -30,6 +38,7 @@ def getListOfEvents(user):
     return (Event.objects.annotate(is_followed=Exists(followed_sports)).order_by('-is_followed', '-created_at'))
 
 def getListOfNews(user):
+    createSportOnStart()
     checkNewsCabangOlahraga()
     followed_sports = Following.objects.all().filter(user=user, cabangOlahraga=OuterRef('cabangOlahraga'))
     return (Berita.objects.annotate(is_followed=Exists(followed_sports)).order_by('-is_followed', '-created_at'))
