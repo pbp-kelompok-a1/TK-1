@@ -13,6 +13,7 @@ from main.forms import CustomUserUpdateForm
 from event.models import Event
 from news.models import Berita
 from comment.models import Comment
+from profil_atlet.models import Atlet
 
 # Create your views here.
 # For events
@@ -34,6 +35,7 @@ def is_admin(user):
     return user.is_superuser
 
 def getListOfEvents(user):
+    createSportOnStart()
     followed_sports = Following.objects.all().filter(user=user, cabangOlahraga=OuterRef('cabangOlahraga'))
     return (Event.objects.annotate(is_followed=Exists(followed_sports)).order_by('-is_followed', '-created_at'))
 
@@ -198,3 +200,24 @@ def profilePage(request, userId):
             "is_admin": is_admin,
             "recentActivity": recentActivity
         }, status=200)
+    
+def getJSONFollowing(request):
+    followings = Following.objects.filter(user=request.user)
+    data = []
+    for follow in followings:
+        data.append({
+            'id': follow.id,
+            'user': follow.user,
+            'cabangOlahraga': follow.cabangOlahraga
+        })
+    return JsonResponse({'followings': data}, status=200)
+
+def getJSONCabangOlahraga(request):
+    cabangOlahraga = CabangOlahraga.objects.all()
+    data = []
+    for cabor in cabangOlahraga:
+        data.append({
+            'id': cabor.id,
+            'name': cabor.name
+        })
+    return JsonResponse({'cabangOlahraga': data}, status=200) 
