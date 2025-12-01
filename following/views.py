@@ -3,8 +3,7 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required, user_passes_test
-from rest_framework.response import Response
+from django.contrib.auth.decorators import login_required
 
 from .models import Following, CabangOlahraga
 from .forms import FollowingForm, OlahragaForm
@@ -13,7 +12,6 @@ from main.forms import CustomUserUpdateForm
 from event.models import Event
 from news.models import Berita
 from comment.models import Comment
-from profil_atlet.models import Atlet
 
 # Create your views here.
 def checkNewsCabangOlahraga():
@@ -76,8 +74,6 @@ def createCabangOlahraga(request):
         
 @login_required
 def profilePage(request, userId):
-    createSportOnStart()
-    
     # Handle profile picture/name update (AJAX)
     if request.method == "POST" and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         # Check if it's a CustomUser update request
