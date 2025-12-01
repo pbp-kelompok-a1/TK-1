@@ -207,8 +207,8 @@ def getJSONFollowing(request):
     for follow in followings:
         data.append({
             'id': follow.id,
-            'user': follow.user,
-            'cabangOlahraga': follow.cabangOlahraga
+            'user': follow.user.id,
+            'cabangOlahraga': follow.cabangOlahraga.id
         })
     return JsonResponse({'followings': data}, status=200)
 
@@ -224,11 +224,14 @@ def getJSONCabangOlahraga(request):
 
 def getJSONCustomUser(request):
     customUser = CustomUser.objects.all()
-    data = {
-        'id': customUser.id,
-        'username': customUser.username,
-        'name': customUser.name,
-        'picture': customUser.picture if customUser.picture else None,
-        'join_date': customUser.join_date
-    }
+    data = []
+    for customUser in customUser:
+        data.append({
+            'uuid': str(customUser.uuid),
+            'user': customUser.user.id,
+            'join_date': customUser.join_date.isoformat(),
+            'username': customUser.username,
+            'name': customUser.name,
+            'picture': customUser.picture.url if customUser.picture else None
+        })
     return JsonResponse({'customUser': data}, status=200)
