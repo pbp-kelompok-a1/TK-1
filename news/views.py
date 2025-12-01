@@ -2,13 +2,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .forms import BeritaForm
 from .models import Berita
-from following.views import getListOfNews, createSportOnStart2
+from following.views import getListOfNews
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.urls import reverse
 
 def berita_list(request):
-    createSportOnStart2()
     berita = Berita.objects.all().order_by('-id')
     if request.user != None:
         try:
