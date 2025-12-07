@@ -2,7 +2,9 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.models import User
+from cloudinary.models import CloudinaryField
 import uuid
+import os
 
 # Create your models here.
 
@@ -12,7 +14,12 @@ class CustomUser(models.Model):
     join_date = models.DateTimeField(default=timezone.now, editable=False)
     username = models.CharField(max_length=100, editable=False)
     name = models.TextField(null=True, editable=True)
-    picture = models.ImageField(default=None, null=True, editable=True)
+    picture = CloudinaryField('image', null=True, blank=True, editable=True)
 
     def __str__(self):
         return self.username
+    
+    def get_picture_url(self):
+        if self.picture:
+            return f"https://res.cloudinary.com/{os.getenv('CLOUD_NAME')}/{self.picture}"
+        return None
