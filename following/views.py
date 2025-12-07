@@ -232,6 +232,6 @@ def getJSONCustomUser(request):
             'join_date': customUser.join_date.isoformat(),
             'username': customUser.username,
             'name': customUser.name,
-            'picture': customUser.picture.url if customUser.picture else None
+            'picture': customUser.get_picture_url() if customUser.picture else None
         })
     return JsonResponse({'customUser': data}, status=200)
