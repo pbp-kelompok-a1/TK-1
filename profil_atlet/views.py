@@ -226,3 +226,25 @@ def delete_medali(request, medal_pk):
         'back_url': reverse('profil_atlet:detail_atlet', args=[atlet_pk])
     }
     return render(request, 'profil_atlet/confirm_delete.html', context)
+
+def show_json_detail_atlet(request, pk):
+    atlet = get_object_or_404(Atlet, pk=pk)
+    
+    # ambil data medali terkait
+    medali_data = []
+    for m in atlet.medali.all():
+        medali_data.append({
+            'medal_type': m.medal_type,
+            'event': m.event,
+            'medal_date': m.medal_date
+        })
+
+    data = {
+        'pk': atlet.pk,
+        'name': atlet.name,
+        'country': atlet.country,
+        'discipline': atlet.discipline.name if atlet.discipline else "General",
+        'birth_date': str(atlet.birth_date) if atlet.birth_date else None,
+        'medali_list': medali_data, # list medali dikirim disini
+    }
+    return JsonResponse(data)
