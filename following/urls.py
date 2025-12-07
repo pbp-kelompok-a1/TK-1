@@ -9,4 +9,5 @@ urlpatterns = [
     path('showJSONFollowing/', getJSONFollowing, name='showJSONFollowing'),
     path('showJSONCabangOlahraga/', getJSONCabangOlahraga, name='showJSONCabangOlahraga'),
     path('showJSONCustomUser/', getJSONCustomUser, name='showJSONCustomUser'),
+    path('getProfilePictureURLs/', getProfilePictureURLs, name='getProfilePictureURLs'),
 ]

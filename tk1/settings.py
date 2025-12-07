@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'authentication',
     'corsheaders',
+    'cloudinary',
 ]
 
 MIDDLEWARE = [
