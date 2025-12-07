@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from cloudinary.models import CloudinaryField
 import uuid
+import os
 
 # Create your models here.
 
@@ -20,5 +21,5 @@ class CustomUser(models.Model):
     
     def get_picture_url(self):
         if self.picture:
-            return f"https://res.cloudinary.com/duq2kfeta/{self.picture}"
+            return f"https://res.cloudinary.com/{os.getenv('CLOUD_NAME')}/{self.picture}"
         return None

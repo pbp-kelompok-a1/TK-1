@@ -16,7 +16,6 @@ from comment.models import Comment
 from profil_atlet.models import Atlet
 
 # Create your views here.
-# For events
 def createSportOnStart():
     for profile_atlet in Atlet.objects.all():
         discipline = profile_atlet.discipline
@@ -85,9 +84,7 @@ def createCabangOlahraga(request):
         
 @login_required
 def profilePage(request, userId):
-    # Handle profile picture/name update (AJAX)
     if request.method == "POST" and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        # Check if it's a CustomUser update request
         if 'update_profile' in request.POST or request.FILES:
             try:
                 custom_user = CustomUser.objects.get(user=request.user)
@@ -101,7 +98,7 @@ def profilePage(request, userId):
                         'message': 'Profile updated successfully',
                         'data': {
                             'name': updated_user.name,
-                            'picture': updated_user.picture.url if updated_user.picture else None
+                            'picture': updated_user.get_picture_url() if updated_user.picture else None
                         }
                     }, status=200)
                 else:
@@ -116,7 +113,6 @@ def profilePage(request, userId):
                     'error': 'User profile not found'
                 }, status=404)
         
-        # Handle following sport (existing code)
         form = FollowingForm(request.POST)
         if form.is_valid():
             follow = form.save(commit=False)
@@ -136,7 +132,6 @@ def profilePage(request, userId):
             }, status=400)
     
     elif request.method == "POST":
-        # Handle non-AJAX POST
         form = FollowingForm(request.POST)
         if form.is_valid():
             follow = form.save(commit=False)
@@ -145,12 +140,10 @@ def profilePage(request, userId):
             return redirect('profile', userId=userId)
     
     else:
-        # GET request - display profile
         form = FollowingForm()
         already_chosen = Following.objects.filter(user=request.user).values_list('cabangOlahraga', flat=True)
         form.fields['cabangOlahraga'].queryset = CabangOlahraga.objects.exclude(id__in=already_chosen)
         
-        # Get or create CustomUser
         try:
             currentUser = CustomUser.objects.get(user=request.user)
         except CustomUser.DoesNotExist:
@@ -183,8 +176,6 @@ def profilePage(request, userId):
         commentCount = Comment.objects.filter(user=request.user).count()
         eventCount = Event.objects.filter(creator=request.user).count()
         is_admin = request.user.is_superuser
-        
-        # Profile update form
         profile_form = CustomUserUpdateForm(instance=currentUser)
 
         return render(request, "profilePage.html", {
