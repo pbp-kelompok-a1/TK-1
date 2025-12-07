@@ -226,3 +226,10 @@ def getJSONCustomUser(request):
             'picture': customUser.get_picture_url() if customUser.picture else None
         })
     return JsonResponse({'customUser': data}, status=200)
+
+def getProfilePictureURLs(user):
+    profile_urls = []
+    for custom_user in CustomUser.objects.all():
+        if custom_user.picture:
+            profile_urls.append(custom_user.get_picture_url())
+    return JsonResponse({'profile_urls':profile_urls}, status=200)

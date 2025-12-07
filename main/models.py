@@ -14,12 +14,56 @@ class CustomUser(models.Model):
     join_date = models.DateTimeField(default=timezone.now, editable=False)
     username = models.CharField(max_length=100, editable=False)
     name = models.TextField(null=True, editable=True)
-    picture = CloudinaryField('image', null=True, blank=True, editable=True)
+    picture = CloudinaryField('image', folder='paraworld/profiles', null=True, blank=True,
+        transformation={
+            'width': 500,
+            'height': 500,
+            'crop': 'limit',
+            'quality': 'auto:good'
+        }
+    )
+    picture_public_id = models.CharField(max_length=255, null=True, blank=True, editable=False)
 
     def __str__(self):
         return self.username
     
     def get_picture_url(self):
-        if self.picture:
-            return f"https://res.cloudinary.com/{os.getenv('CLOUD_NAME')}/{self.picture}"
-        return None
+        if not self.picture:
+            return None
+        
+        try:
+            if hasattr(self.picture, 'url'):
+                return self.picture.url
+            
+            if isinstance(self.picture, str):
+                if self.picture.startswith('http'):
+                    return self.picture
+                import cloudinary
+                return cloudinary.CloudinaryImage(self.picture).build_url()
+            
+            return str(self.picture)
+            
+        except Exception as e:
+            print(f"Error getting picture URL for user {self.username}: {e}")
+            return None
+        
+    def get_thumbnail_url(self, width=150, height=150):
+        if not self.picture:
+            return None
+            
+        try:
+            import cloudinary
+            if self.picture_public_id:
+                return cloudinary.CloudinaryImage(self.picture_public_id).build_url(
+                    transformation={
+                        'width': width,
+                        'height': height,
+                        'crop': 'thumb',
+                        'gravity': 'face',
+                        'quality': 'auto:good'
+                    }
+                )
+            return self.get_picture_url()
+        except Exception as e:
+            print(f"Error getting thumbnail for user {self.username}: {e}")
+            return None
