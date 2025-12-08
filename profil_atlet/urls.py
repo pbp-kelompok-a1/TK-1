@@ -21,4 +21,6 @@ urlpatterns = [
     path('update_medal/<int:medal_pk>/', views.update_medali, name='update_medali'),
     path('delete_medal/<int:medal_pk>/', views.delete_medali, name='delete_medali'),
     path('json-detail/<int:pk>/', views.show_json_detail_atlet, name='show_json_detail_atlet'),
+    path('create-flutter/', views.create_atlet_flutter, name='create_atlet_flutter'),
+    path('edit-flutter/<int:pk>/', views.edit_atlet_flutter, name='edit_atlet_flutter'),
 ]
