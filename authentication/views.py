@@ -6,6 +6,8 @@ from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth import logout as auth_logout
 import json
 import datetime
+from django.core.exceptions import ValidationError
+from django.contrib.auth.password_validation import validate_password
 
 from main.models import CustomUser
 
@@ -38,31 +40,30 @@ def login(request):
 
 @csrf_exempt
 def register(request):
-    if request.method == 'POST':
+    try:        
+        if request.method != 'POST':
+            return JsonResponse({"status": False, "message": "Invalid request method."}, status=400)
+
         data = json.loads(request.body)
+        
         username = data['username']
         password1 = data['password1']
         password2 = data['password2']
 
-        # Check if the passwords match
         if password1 != password2:
-            return JsonResponse({
-                "status": False,
-                "message": "Passwords do not match."
-            }, status=400)
-        
-        # Check if the username is already taken
+            return JsonResponse({"status": False, "message": "Passwords do not match."}, status=400)
+
         if User.objects.filter(username=username).exists():
-            return JsonResponse({
-                "status": False,
-                "message": "Username already exists."
-            }, status=400)
-        
-        # Create the new user
+            return JsonResponse({"status": False, "message": "Username already exists."}, status=400)
+
         user = User.objects.create_user(username=username, password=password1)
         user.save()
 
-        custom_user = CustomUser.objects.create(user=user,username=user.username,name=user.username, join_date=datetime.datetime.now())
+        custom_user = CustomUser.objects.create(
+            user=user,
+            username=user.username,
+            name=user.username
+        )
         custom_user.save()
 
         return JsonResponse({
@@ -71,11 +72,12 @@ def register(request):
             "message": "User created successfully!"
         }, status=200)
     
-    else:
+    except Exception as e:
+        print("ERROR:", e)
         return JsonResponse({
             "status": False,
-            "message": "Invalid request method."
-        }, status=400)
+            "message": f"Server error: {str(e)}"
+        }, status=500)
 
 @csrf_exempt
 def logout(request):
