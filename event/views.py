@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.dateparse import parse_datetime
 
 from following.models import CabangOlahraga
 
@@ -169,27 +170,25 @@ def create_event_flutter(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            cabang_id = data.get("cabag_olahraga_id")
             
+            # 1. Handle Sport Branch (Cabang Olahraga)
+            cabang_id = data.get("cabang_olahraga_id") or data.get("cabangOlahraga")
+            
+            cabang_olahraga_obj = None
             if cabang_id:
-                cabang_olahraga_obj = CabangOlahraga.objects.get(id=cabang_id)
-            else: 
-                cabang_olahraga_obj = None
-                
+                cabang_olahraga_obj = CabangOlahraga.objects.get(id=int(cabang_id))
+            
+            # 2. Create Event
             new_event = Event.objects.create(
                 creator=request.user,
-                
                 title=data["title"],
-                description = data["description"],
-                location = data.get("location", ""),
-                
-                cabangOlahraga = cabang_olahraga_obj,
-                
-                picture_url = data.get("picture_url", ""),
-                
-                start_time = parse_datetime(data["start_time"]),
-                
-                event_type = "community",
+                description=data["description"],
+                location=data.get("location", ""),
+                cabangOlahraga=cabang_olahraga_obj,
+                picture_url=data.get("picture_url", ""),
+                start_time=parse_datetime(data["start_time"]),
+                end_time=parse_datetime(data["end_time"]) if "end_time" in data else None,
+                event_type=EventType.COMMUNITY,
             )
             
             new_event.save()
@@ -197,8 +196,111 @@ def create_event_flutter(request):
 
         except CabangOlahraga.DoesNotExist:
             return JsonResponse({"status": "error", "message": "Cabang Olahraga tidak ditemukan."}, status=404)
-        
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
     return JsonResponse({"status": "error", "message": "Metode request tidak valid."}, status=401)
+
+
+@csrf_exempt
+def edit_event_flutter(request, event_id):
+    if request.method == 'POST':
+        try:
+            event = Event.objects.get(id=event_id)
+            
+            # onlu admin/creator can edit
+            if event.creator != request.user and not request.user.is_superuser:
+                 return JsonResponse({"status": "error", "message": "Permission Denied"}, status=403)
+
+            data = json.loads(request.body)
+
+            # update fields
+            event.title = data['title']
+            event.description = data['description']
+            event.location = data['location']
+            event.picture_url = data['picture_url']
+            event.start_time = parse_datetime(data['start_time'])
+            
+            if 'end_time' in data:
+                event.end_time = parse_datetime(data['end_time'])
+
+            # handle sport branch
+            cabang_id = data.get("cabang_olahraga_id") or data.get("cabangOlahraga")
+            if cabang_id:
+                event.cabangOlahraga = CabangOlahraga.objects.get(id=int(cabang_id))
+
+            event.save()
+
+            return JsonResponse({"status": "success", "message": "Event updated!"}, status=200)
+        except Event.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Event not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+            
+    return JsonResponse({"status": "error", "message": "Invalid method"}, status=401)
+
+
+@csrf_exempt
+def delete_event_flutter(request, event_id):
+    if request.method == 'POST':
+        try:
+            event = Event.objects.get(id=event_id)
+            
+            # creator/admin only
+            if event.creator != request.user and not request.user.is_superuser:
+                 return JsonResponse({"status": "error", "message": "Permission Denied"}, status=403)
+            
+            event.delete()
+            return JsonResponse({"status": "success", "message": "Event deleted!"}, status=200)
+        except Event.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Event not found"}, status=404)
+            
+    return JsonResponse({"status": "error", "message": "Invalid method"}, status=401)
+
+
+@csrf_exempt
+def create_event_flutter_global(request):
+    if request.method == 'POST':
+        # 1. Security Check
+        if not request.user.is_staff:
+            return JsonResponse({
+                "status": "error", 
+                "message": "Permission denied. You must be an admin."
+            }, status=403)
+
+        try:
+            data = json.loads(request.body)
+            
+            # Handle key mismatch from Flutter
+            cabang_id = data.get("cabang_olahraga_id") or data.get("cabangOlahraga") or data.get("cabang_olahraga")
+            
+            sport = None
+            if cabang_id:
+                sport = CabangOlahraga.objects.get(pk=int(cabang_id))
+
+            new_event = Event.objects.create(
+                creator=request.user,
+                title=data["title"],
+                description=data["description"],
+                location=data["location"],
+                picture_url=data.get("picture_url", ""), 
+                cabangOlahraga=sport,
+                start_time=parse_datetime(data["start_time"]),
+                end_time=parse_datetime(data["end_time"]) if "end_time" in data else None,
+                event_type=EventType.GLOBAL, 
+            )
+
+            new_event.save()
+
+            return JsonResponse({"status": "success"}, status=200)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+    return JsonResponse({"status": "error", "message": "Invalid method"}, status=401)
+
+def get_user_status(request):
+    return JsonResponse({
+        'is_logged_in': request.user.is_authenticated,
+        'is_superuser': request.user.is_superuser,
+        'username': request.user.username,
+    })
