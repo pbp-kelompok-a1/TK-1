@@ -233,3 +233,38 @@ def getProfilePictureURLs(user):
         if custom_user.picture:
             profile_urls.append(custom_user.get_picture_url())
     return JsonResponse({'profile_urls':profile_urls}, status=200)
+
+@login_required
+def getCurrentUser(request):
+    try:
+        custom_user = CustomUser.objects.get(user=request.user)
+        return JsonResponse({
+            'user_id': request.user.id,
+            'username': custom_user.username,
+            'name': custom_user.name,
+            'picture': custom_user.get_picture_url(),
+            'join_date': custom_user.join_date.isoformat(),
+        }, status=200)
+    except CustomUser.DoesNotExist:
+        return JsonResponse({
+            'error': 'User profile not found'
+        }, status=404)
+    
+def getUsers(request):
+    try:
+        customUser = CustomUser.objects.all()
+        return JsonResponse({
+            'users': [
+                {
+                    'user_id': user.user.id,
+                    'username': user.username,
+                    'name': user.name,
+                    'picture': user.get_picture_url(),
+                    'join_date': user.join_date.isoformat(),
+                } for user in customUser
+            ]
+        }, status=200)
+    except CustomUser.DoesNotExist:
+        return JsonResponse({
+            'error': 'User profile not found'
+        }, status=404)
