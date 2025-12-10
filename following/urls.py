@@ -10,4 +10,6 @@ urlpatterns = [
     path('showJSONCabangOlahraga/', getJSONCabangOlahraga, name='showJSONCabangOlahraga'),
     path('showJSONCustomUser/', getJSONCustomUser, name='showJSONCustomUser'),
     path('getProfilePictureURLs/', getProfilePictureURLs, name='getProfilePictureURLs'),
+    path('currentUser/', getCurrentUser, name='currentUser'),
+    path('users/', getUsers, name='users'),
 ]
