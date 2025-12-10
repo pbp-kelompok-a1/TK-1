@@ -75,7 +75,7 @@ def createCabangOlahraga(request):
     if (request.method == 'GET'):
         form = OlahragaForm()
         context = {'form': form,'page_title': 'Add Sport'}
-        return render(request, 'cabangOlahragaCreationPage.html', context)
+        return JsonResponse(context)
     else:
         form = OlahragaForm(request.POST)
         if (form.is_valid()):
@@ -83,7 +83,7 @@ def createCabangOlahraga(request):
             return redirect('main:show_main')
         
 @login_required
-def profilePage(request, userId):
+def profilePage(request):
     if request.method == "POST" and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         if 'update_profile' in request.POST or request.FILES:
             try:
@@ -137,7 +137,7 @@ def profilePage(request, userId):
             follow = form.save(commit=False)
             follow.user = request.user
             follow.save()
-            return redirect('profile', userId=userId)
+            return redirect('profile')
     
     else:
         form = FollowingForm()
@@ -170,6 +170,8 @@ def profilePage(request, userId):
             recentActivity.append({
                 "object": activity,
                 "type": activity.__class__.__name__,
+                "description": activity.title if hasattr(activity, 'title') else activity.content,
+                "date": activity.created_at.strftime("%Y-%m-%d")
             })
 
         followingCount = Following.objects.filter(user=request.user).count()
@@ -178,7 +180,20 @@ def profilePage(request, userId):
         is_admin = request.user.is_superuser
         profile_form = CustomUserUpdateForm(instance=currentUser)
 
-        return render(request, "profilePage.html", {
+        # return render(request, "profilePage.html", {
+        #     "form": form,
+        #     "profile_form": profile_form,
+        #     "profilePicture": profilePicture,
+        #     "name": name,
+        #     "username": username,
+        #     "following": following,
+        #     "followingCount": followingCount,
+        #     "commentCount": commentCount,
+        #     "eventCount": eventCount,
+        #     "is_admin": is_admin,
+        #     "recentActivity": recentActivity
+        # }, status=200)
+        return JsonResponse({
             "form": form,
             "profile_form": profile_form,
             "profilePicture": profilePicture,
