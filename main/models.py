@@ -30,40 +30,9 @@ class CustomUser(models.Model):
     def get_picture_url(self):
         if not self.picture:
             return None
-        
-        try:
-            if hasattr(self.picture, 'url'):
-                return self.picture.url
-            
-            if isinstance(self.picture, str):
-                if self.picture.startswith('http'):
-                    return self.picture
-                import cloudinary
-                return cloudinary.CloudinaryImage(self.picture).build_url()
-            
-            return str(self.picture)
-            
-        except Exception as e:
-            print(f"Error getting picture URL for user {self.username}: {e}")
-            return None
-        
-    def get_thumbnail_url(self, width=150, height=150):
-        if not self.picture:
-            return None
             
         try:
-            import cloudinary
-            if self.picture_public_id:
-                return cloudinary.CloudinaryImage(self.picture_public_id).build_url(
-                    transformation={
-                        'width': width,
-                        'height': height,
-                        'crop': 'thumb',
-                        'gravity': 'face',
-                        'quality': 'auto:good'
-                    }
-                )
-            return self.get_picture_url()
+            return self.picture.url
         except Exception as e:
-            print(f"Error getting thumbnail for user {self.username}: {e}")
+            print(f"Error getting picture URL for {self.username}: {e}")
             return None
