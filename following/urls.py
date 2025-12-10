@@ -12,4 +12,6 @@ urlpatterns = [
     path('getProfilePictureURLs/', getProfilePictureURLs, name='getProfilePictureURLs'),
     path('currentUser/', getCurrentUser, name='currentUser'),
     path('users/', getUsers, name='users'),
+    path('profile2/', profilePage2, name='profile2'),
+    path('unfollow2/<uuid:follow_id>/', unfollow2, name='unfollow2')
 ]

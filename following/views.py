@@ -4,6 +4,11 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.files.base import ContentFile
+import base64
+import uuid
 
 from .models import Following, CabangOlahraga
 from .forms import FollowingForm, OlahragaForm
@@ -283,3 +288,155 @@ def getUsers(request):
         return JsonResponse({
             'error': 'User profile not found'
         }, status=404)
+
+@csrf_exempt
+def profilePage2(request):
+    if request.method == 'POST':
+        try:
+            custom_user = CustomUser.objects.get(user=request.user)
+            post_data = request.POST.copy()
+            file_data = request.FILES.copy()
+            picture_data = request.POST.get('picture')
+            
+            if picture_data and picture_data.startswith('data:image'):
+                try:
+                    format_header, imgstr = picture_data.split(';base64,') 
+                    mime_type = format_header.split(':')[-1]
+                    ext = mime_type.split('/')[-1]
+                    file_name = f"{request.user.username}_{uuid.uuid4().hex[:8]}.{ext}"
+                    image_content = base64.b64decode(imgstr)
+
+                    upload_file = SimpleUploadedFile(
+                        name=file_name,
+                        content=image_content,
+                        content_type=mime_type
+                    )
+                    
+                    file_data['picture'] = upload_file
+                    
+                    if 'picture' in post_data:
+                        del post_data['picture']
+                except Exception as e:
+                    print(f"Error decoding base64 image: {e}")
+
+            if 'update_profile' in request.POST or picture_data:
+                form = CustomUserUpdateForm(post_data, file_data, instance=custom_user)
+                
+                if form.is_valid():
+                    updated_user = form.save()
+                    
+                    return JsonResponse({
+                        'success': True,
+                        'message': 'Profile updated successfully',
+                        'data': {
+                            'name': updated_user.name,
+                            'picture': updated_user.get_picture_url()
+                        }
+                    }, status=200)
+                else:
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Validation failed',
+                        'errors': form.errors
+                    }, status=400)
+
+            elif 'cabangOlahraga' in request.POST:
+                cabang_id = request.POST.get('cabangOlahraga')
+                
+                if Following.objects.filter(user=request.user, cabangOlahraga_id=cabang_id).exists():
+                    return JsonResponse({'success': False, 'error': 'Already following'}, status=400)
+                
+                cabang = CabangOlahraga.objects.get(id=cabang_id)
+                follow = Following.objects.create(user=request.user, cabangOlahraga=cabang)
+                
+                return JsonResponse({
+                    'success': True,
+                    'follow_id': str(follow.id),
+                    'sport_id': str(follow.cabangOlahraga.id),
+                    'sport_name': follow.cabangOlahraga.name
+                }, status=201)
+
+        except CustomUser.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'User profile not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+    try:
+        custom_user = CustomUser.objects.get(user=request.user)
+        
+        following_list = [
+            {
+                'id': str(f.id),
+                'cabangOlahraga': str(f.cabangOlahraga.id),
+                'sport_name': f.cabangOlahraga.name
+            } for f in Following.objects.filter(user=request.user).select_related('cabangOlahraga')
+        ]
+        
+        already_chosen_ids = Following.objects.filter(user=request.user).values_list('cabangOlahraga_id', flat=True)
+        available_sports = [
+            {'id': str(s.id), 'name': s.name} 
+            for s in CabangOlahraga.objects.exclude(id__in=already_chosen_ids)
+        ]
+
+        activities = sorted(
+            list(Comment.objects.filter(user=request.user)) + 
+            list(Event.objects.filter(creator=request.user)),
+            key=lambda x: x.created_at, 
+            reverse=True
+        )[:3]
+
+        recent_activity = []
+        for activity in activities:
+            act_type = activity.__class__.__name__
+            desc = f'posted an event: {activity.title}' if act_type == 'Event' else 'made a comment'
+            recent_activity.append({
+                'type': act_type,
+                'description': desc,
+                'date': activity.created_at.strftime('%Y-%m-%d')
+            })
+
+        return JsonResponse({
+            'success': True,
+            'name': custom_user.name,
+            'username': custom_user.username,
+            'profilePicture': custom_user.get_picture_url(),
+            'join_date': custom_user.join_date.isoformat() if custom_user.join_date else None,
+            'following': following_list,
+            'available_sports': available_sports,
+            'followingCount': len(following_list),
+            'commentCount': Comment.objects.filter(user=request.user).count(),
+            'eventCount': Event.objects.filter(creator=request.user).count(),
+            'recentActivity': recent_activity
+        }, status=200)
+
+    except CustomUser.DoesNotExist:
+        custom_user = CustomUser.objects.create(user=request.user, username=request.user.username)
+        return JsonResponse({'success': True, 'username': custom_user.username}, status=200) # Simple return
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def unfollow2(request, follow_id):
+    try:
+        follow = Following.objects.get(id=follow_id, user=request.user)
+        sport_name = follow.cabangOlahraga.name
+        sport_id = follow.cabangOlahraga.id
+        follow.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'sport_id': str(sport_id),
+            'sport_name': sport_name
+        }, status=200)
+        
+    except Following.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'Follow not found'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
