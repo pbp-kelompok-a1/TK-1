@@ -16,8 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from news.views import create_news_flutter
 
 urlpatterns = [
+    path('create-flutter/', create_news_flutter, name='create_news_flutter'),
     path('admin/', admin.site.urls),
     path('following/', include('following.urls')), # abhi
     path('atlet/', include('profil_atlet.urls')),  # nicho

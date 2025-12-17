@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.html import strip_tags
 import json
 from django.http import JsonResponse
+from django.contrib.auth.models import User
 
 def berita_list(request):
     createSportOnStart2()
@@ -114,43 +115,63 @@ def berita_json_detail(request, pk):
 
     return JsonResponse(data)
 
+@csrf_exempt
 def proxy_image(request):
     image_url = request.GET.get('url')
     if not image_url:
         return HttpResponse('No URL provided', status=400)
     
     try:
-        # Fetch image from external source
-        response = requests.get(image_url, timeout=10)
+        # --- TAMBAHAN PENTING: User-Agent ---
+        # Kita pura-pura jadi Browser Chrome biasa
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        }
+        
+        # Masukkan headers ke dalam request
+        response = requests.get(image_url, headers=headers, timeout=10)
+        
+        # Cek apakah server gambar menolak (misal 403 Forbidden)
         response.raise_for_status()
         
-        # Return the image with proper content type
         return HttpResponse(
             response.content,
             content_type=response.headers.get('Content-Type', 'image/jpeg')
         )
-    except requests.RequestException as e:
+    except Exception as e:
+        # Print error di terminal Django biar ketahuan salahnya apa
+        print(f"Error Proxy Image: {e}") 
         return HttpResponse(f'Error fetching image: {str(e)}', status=500)
     
 @csrf_exempt
 def create_news_flutter(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        title = strip_tags(data.get("title", ""))  # Strip HTML tags
-        content = strip_tags(data.get("content", ""))  # Strip HTML tags
-        category = data.get("category", "")
+
+        # === LOGIKA BARU UNTUK HANDLE USER ===
+        if request.user.is_authenticated:
+            # Kalau sudah login, pakai user yang login
+            user = request.user
+        else:
+            # Kalau BELUM login, kita pinjam akun pertama di database (Admin)
+            # Ini cuma buat ngetes biar ga error 500
+            user = User.objects.first() 
+        # ======================================
+
+        title = strip_tags(data.get("title", ""))
+        content = strip_tags(data.get("content", ""))
+        category = data.get("category", "other")
         thumbnail = data.get("thumbnail", "")
-        user = request.user
-        
+
         new_news = Berita(
             title=title, 
             content=content,
             category=category,
             thumbnail=thumbnail,
-            user=user
+            author=user # Sekarang user pasti terisi (entah login atau pinjam admin)
         )
         new_news.save()
-        
+
         return JsonResponse({"status": "success"}, status=200)
     else:
         return JsonResponse({"status": "error"}, status=401)
@@ -176,6 +197,6 @@ def edit_flutter(request, pk):
         item.thumbnail = data.get("thumbnail", item.thumbnail)
 
         item.save()
-        return JsonResponse({"status": "ok"})
+        return JsonResponse({"status": "success"})
 
     return JsonResponse({"status": "error"}, status=405)
