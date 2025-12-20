@@ -11,8 +11,10 @@ import datetime
 from news.models import Berita
 from event.models import Event
 from profil_atlet.models import Atlet
+from following.views import createSportOnStart
 
 from .models import CustomUser
+from .forms import CustomUserUpdateForm
 
 def register(request):
     form = UserCreationForm()
@@ -21,7 +23,7 @@ def register(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            newUser = CustomUser(user=user, username=user.username, name=user.username)
+            newUser = CustomUser(user=user, username=user.username, name=user.username, join_date=datetime.datetime.now())
             newUser.save()
             messages.success(request, 'Your account has been successfully created!')
             return redirect('main:login')
@@ -37,6 +39,7 @@ def login_user(request):
             login(request, user)
             response = HttpResponseRedirect(reverse("main:show_main"))
             response.set_cookie('last_login', str(datetime.datetime.now()))
+            createSportOnStart()
             return response
         else:
             messages.error(request, 'Invalid username or password. Please try again.')
@@ -52,6 +55,8 @@ def logout_user(request):
     return response
 
 def show_main(request):
+    createSportOnStart()
+
     # Ambil 3–5 berita terbaru
     top_news = Berita.objects.all().order_by('-id')[:10]
     upcoming_events = Event.objects.filter(start_time__gte=timezone.now()).order_by('start_time')[:10]
@@ -68,3 +73,16 @@ def show_main(request):
 def errorPage(request):
     return render(request, "error.html")
 
+@login_required
+def update_atlet(request, pk):
+    customUser = get_object_or_404(CustomUser, pk=pk)
+    if request.method == 'POST':
+        form = CustomUserUpdateForm(request.POST, instance=customUser)
+        if form.is_valid():
+            form.save()
+            return redirect('profil_atlet:detail_atlet', pk=customUser.pk) 
+    else:
+        form = CustomUserUpdateForm(instance=customUser)
+        
+    context = {'form': form, 'back_url': reverse('profil_atlet:detail_atlet', args=[customUser.pk])}
+    return render(request, 'profil_atlet/form_atlet.html', context)

@@ -1,4 +1,5 @@
 from django.db import models
+from following.models import CabangOlahraga
 
 class Atlet(models.Model):
     # key unik untuk matching dengan file medali
@@ -7,7 +8,8 @@ class Atlet(models.Model):
     # data untuk Guest
     name = models.CharField(max_length=255)
     country = models.CharField(max_length=100)
-    discipline = models.CharField(max_length=100)
+    
+    discipline = models.ForeignKey(CabangOlahraga, on_delete=models.CASCADE, related_name='atlets', null=True, blank=True)
     
     # data detail (untuk Member & Admin, sesuai CSV
     gender = models.CharField(max_length=10, blank=True, null=True)

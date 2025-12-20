@@ -30,26 +30,17 @@ class AtletForm(forms.ModelForm):
         
     def clean_name(self):
         data = self.cleaned_data.get('name')
-        if data:
-            return strip_tags(data)
+        if data: return strip_tags(data)
         return data
 
     def clean_short_name(self):
         data = self.cleaned_data.get('short_name')
-        if data:
-            return strip_tags(data)
+        if data: return strip_tags(data)
         return data
 
     def clean_country(self):
         data = self.cleaned_data.get('country')
-        if data:
-            return strip_tags(data)
-        return data
-
-    def clean_discipline(self):
-        data = self.cleaned_data.get('discipline')
-        if data:
-            return strip_tags(data)
+        if data: return strip_tags(data)
         return data
 
     def clean_gender(self):

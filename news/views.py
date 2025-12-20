@@ -15,7 +15,6 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User
 
 def berita_list(request):
-    createSportOnStart2()
     berita = Berita.objects.all().order_by('-id')
     if request.user != None:
         try:

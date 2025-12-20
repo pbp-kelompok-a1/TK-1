@@ -10,6 +10,7 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 from django.urls import reverse
+from following.models import CabangOlahraga
 
 # fungsi cek Admin 
 # utk jadi Admin harus dipastikan punya status 'is_superuser' 
@@ -105,7 +106,7 @@ def delete_atlet(request, pk):
 # function view utk  data JSON
 def show_json_atlet(request):
     # kita ambil query yg sama persis dgnview list_atlet
-    base_query = Atlet.objects.annotate(
+    base_query = Atlet.objects.select_related('discipline').annotate(
         gold_count=Count('medali', filter=Q(medali__medal_type='Gold Medal')),
         silver_count=Count('medali', filter=Q(medali__medal_type='Silver Medal')),
         bronze_count=Count('medali', filter=Q(medali__medal_type='Bronze Medal')),
@@ -113,17 +114,18 @@ def show_json_atlet(request):
     )
 
     if request.user.is_authenticated and request.user.is_superuser:
-        atlet_list = base_query.order_by(Lower('name'))
+        atlet_list = base_query.order_by('discipline__name', Lower('name'))
     else:
         atlet_list = base_query.filter(is_visible=True).order_by(Lower('name'))
         
     data = []
     for atlet in atlet_list:
+        nama_discipline = atlet.discipline.name if atlet.discipline else "General"
         data.append({
             'pk': atlet.pk,
             'name': atlet.name,
             'short_name': atlet.short_name,
-            'discipline': atlet.discipline,
+            'discipline': nama_discipline,
             'country': atlet.country,
             'is_visible': atlet.is_visible,
             'gold_count': atlet.gold_count,
@@ -154,7 +156,7 @@ def create_atlet_ajax(request):
 
 @csrf_exempt 
 def delete_atlet_ajax(request, pk):
-    if request.method == "DELETE":
+    if request.method == "POST" or request.method == "DELETE":
         try:
             atlet = get_object_or_404(Atlet, pk=pk)
             atlet.delete()
@@ -225,3 +227,71 @@ def delete_medali(request, medal_pk):
         'back_url': reverse('profil_atlet:detail_atlet', args=[atlet_pk])
     }
     return render(request, 'profil_atlet/confirm_delete.html', context)
+
+def show_json_detail_atlet(request, pk):
+    atlet = get_object_or_404(Atlet, pk=pk)
+    
+    # ambil data medali terkait
+    medali_data = []
+    for m in atlet.medali.all():
+        medali_data.append({
+            'medal_type': m.medal_type,
+            'event': m.event,
+            'medal_date': m.medal_date
+        })
+
+    data = {
+        'pk': atlet.pk,
+        'name': atlet.name,
+        'country': atlet.country,
+        'discipline': atlet.discipline.name if atlet.discipline else "General",
+        'birth_date': str(atlet.birth_date) if atlet.birth_date else None,
+        'medali_list': medali_data, # list medali dikirim disini
+    }
+    return JsonResponse(data)
+
+@csrf_exempt
+def edit_atlet_flutter(request, pk):
+    if request.method == 'POST':
+        try:
+            atlet = Atlet.objects.get(pk=pk)
+            # Ambil data dari body JSON yang dikirim Flutter
+            data = json.loads(request.body)
+            
+            # Update data
+            atlet.name = data.get('name', atlet.name)
+            atlet.country = data.get('country', atlet.country)
+           
+            atlet.save()
+            
+            return JsonResponse({"status": "success", "message": "Berhasil edit!"}, status=200)
+        except Atlet.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Atlet tidak ditemukan"}, status=404)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+            
+    return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
+
+@csrf_exempt
+def create_atlet_flutter(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            discipline_name = data.get('discipline', 'General')
+            cabor_obj, created = CabangOlahraga.objects.get_or_create(name=discipline_name)
+
+            new_atlet = Atlet.objects.create(
+                name=data.get('name'),
+                country=data.get('country'),
+                discipline=cabor_obj,
+                is_visible=True, 
+            )
+            
+            new_atlet.save()
+
+            return JsonResponse({"status": "success", "message": "Berhasil buat atlet baru!"}, status=200)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+            
+    return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
