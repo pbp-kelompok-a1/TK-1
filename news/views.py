@@ -6,6 +6,13 @@ from following.views import getListOfNews, createSportOnStart
 from django.http import JsonResponse, HttpResponse
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.forms.models import model_to_dict
+import requests
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.html import strip_tags
+import json
+from django.http import JsonResponse
+from django.contrib.auth.models import User
 
 def berita_list(request):
     berita = Berita.objects.all().order_by('-id')

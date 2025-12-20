@@ -36,7 +36,7 @@
 
 
     <!-- OWNER EDIT/DELETE -->
-    {% if request.user == b.author or request.user.is_superuser %}
+    {% if request.user == b.author %}
         <div class="mt-6 flex gap-3">
             <a href="{% url 'news:berita_edit' b.id %}" class="text-yellow-600 hover:underline">Edit</a>
             <a href="{% url 'news:berita_delete' b.id %}" class="text-red-600 hover:underline">Delete</a>

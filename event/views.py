@@ -1,11 +1,15 @@
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 
-from .models import Event, EventType
+from following.models import CabangOlahraga
+
+from .models import Event, EventType, SportBranch
 from .forms import EventForm
 from following.views import getListOfEvents
 
@@ -110,3 +114,91 @@ def event_edit(request, event_id):
     }
     
     return render(request, 'event_create_form.html', context)
+
+def show_json(request):
+    data = Event.objects.all()
+    response_data = []
+
+    for event in data:
+        response_data.append({
+            "id": str(event.id),
+            "title": event.title,
+            "description": event.description,
+            "sport_branch": event.sport_branch,
+            "location": event.location,
+            "picture_url": event.picture_url,
+            "start_time": event.start_time.isoformat(),
+            "end_time": event.end_time.isoformat() if event.end_time else None,
+            "event_type": event.event_type,
+            "creator": event.creator.id if event.creator else None,
+            "cabangOlahraga": event.cabangOlahraga.id if event.cabangOlahraga else None,
+            "created_at": event.created_at.isoformat(),
+        })
+
+    return JsonResponse(response_data, safe=False)
+
+@csrf_exempt
+def create_event_flutter(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            new_event = Event.objects.create(
+                creator=request.user,
+                title = data["title"],
+                description = data["description"],
+                sport_branch = data.get("sport_branch", SportBranch.OTHER),
+                location = data.get("location", ""),    
+                picture_url = data.get("picture_url", ""),
+                start_time = data["start_time"],
+                end_time = data.get("end_time", None),
+                event_type = data.get("event_type", EventType.COMMUNITY),
+            )
+            
+            new_event.save()
+            
+            return JsonResponse({"status": "success", "message": "Event created successfully."}, status=201)
+        
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+        
+    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+@csrf_exempt
+def create_event_flutter(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            cabang_id = data.get("cabag_olahraga_id")
+            
+            if cabang_id:
+                cabang_olahraga_obj = CabangOlahraga.objects.get(id=cabang_id)
+            else: 
+                cabang_olahraga_obj = None
+                
+            new_event = Event.objects.create(
+                creator=request.user,
+                
+                title=data["title"],
+                description = data["description"],
+                location = data.get("location", ""),
+                
+                cabangOlahraga = cabang_olahraga_obj,
+                
+                picture_url = data.get("picture_url", ""),
+                
+                start_time = parse_datetime(data["start_time"]),
+                
+                event_type = "community",
+            )
+            
+            new_event.save()
+            return JsonResponse({"status": "success", "message": "Event berhasil dibuat!"}, status=200)
+
+        except CabangOlahraga.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Cabang Olahraga tidak ditemukan."}, status=404)
+        
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+    return JsonResponse({"status": "error", "message": "Metode request tidak valid."}, status=401)
