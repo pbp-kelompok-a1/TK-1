@@ -186,24 +186,10 @@ def profilePage(request):
         is_admin = request.user.is_superuser
         profile_form = CustomUserUpdateForm(instance=currentUser)
 
-        # return render(request, "profilePage.html", {
-        #     "form": form,
-        #     "profile_form": profile_form,
-        #     "profilePicture": profilePicture,
-        #     "name": name,
-        #     "username": username,
-        #     "following": following,
-        #     "followingCount": followingCount,
-        #     "commentCount": commentCount,
-        #     "eventCount": eventCount,
-        #     "is_admin": is_admin,
-        #     "recentActivity": recentActivity
-        # }, status=200)
-        return JsonResponse({
+        return render(request, "profilePage.html", {
             "form": form,
             "profile_form": profile_form,
             "profilePicture": profilePicture,
-            "user": userId,
             "name": name,
             "username": username,
             "following": following,
@@ -213,6 +199,20 @@ def profilePage(request):
             "is_admin": is_admin,
             "recentActivity": recentActivity
         }, status=200)
+        # return JsonResponse({
+        #     "form": form,
+        #     "profile_form": profile_form,
+        #     "profilePicture": profilePicture,
+        #     "user": userId,
+        #     "name": name,
+        #     "username": username,
+        #     "following": following,
+        #     "followingCount": followingCount,
+        #     "commentCount": commentCount,
+        #     "eventCount": eventCount,
+        #     "is_admin": is_admin,
+        #     "recentActivity": recentActivity
+        # }, status=200)
     
 def getJSONFollowing(request):
     followings = Following.objects.all()
@@ -356,6 +356,7 @@ def profilePage2(request):
                     'success': True,
                     'follow_id': str(follow.id),
                     'sport_id': str(follow.cabangOlahraga.id),
+                    'user': str(follow.user.id),
                     'sport_name': follow.cabangOlahraga.name
                 }, status=201)
 
@@ -369,16 +370,17 @@ def profilePage2(request):
         
         following_list = [
             {
-                'id': str(f.id),
-                'cabangOlahraga': str(f.cabangOlahraga.id),
-                'sport_name': f.cabangOlahraga.name
-            } for f in Following.objects.filter(user=request.user).select_related('cabangOlahraga')
+                'id': str(follow.id),
+                'user': follow.user.id,
+                'cabangOlahraga': str(follow.cabangOlahraga.id),
+                'sport_name': follow.cabangOlahraga.name
+            } for follow in Following.objects.filter(user=request.user).select_related('cabangOlahraga')
         ]
         
         already_chosen_ids = Following.objects.filter(user=request.user).values_list('cabangOlahraga_id', flat=True)
         available_sports = [
-            {'id': str(s.id), 'name': s.name} 
-            for s in CabangOlahraga.objects.exclude(id__in=already_chosen_ids)
+            {'id': str(sport.id), 'name': sport.name} 
+            for sport in CabangOlahraga.objects.exclude(id__in=already_chosen_ids)
         ]
 
         activities = sorted(
