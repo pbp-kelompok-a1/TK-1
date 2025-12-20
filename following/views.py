@@ -159,10 +159,11 @@ def profilePage(request):
             )
         
         profilePicture = currentUser.picture if currentUser.picture else None
+        userId = request.user.id
         name = currentUser.name if currentUser.name else request.user.username
         username = currentUser.username
         
-        following = Following.objects.all().filter(user=request.user)
+        following = Following.objects.filter(user=request.user)
         comment = Comment.objects.filter(user=request.user)
         event = Event.objects.filter(creator=request.user)
         news = Berita.objects.filter(author=request.user)
@@ -179,9 +180,9 @@ def profilePage(request):
                 "date": activity.created_at.strftime("%Y-%m-%d")
             })
 
-        followingCount = Following.objects.filter(user=request.user).count()
-        commentCount = Comment.objects.filter(user=request.user).count()
-        eventCount = Event.objects.filter(creator=request.user).count()
+        followingCount = following.count()
+        commentCount = comment.count()
+        eventCount = event.count()
         is_admin = request.user.is_superuser
         profile_form = CustomUserUpdateForm(instance=currentUser)
 
@@ -202,6 +203,7 @@ def profilePage(request):
             "form": form,
             "profile_form": profile_form,
             "profilePicture": profilePicture,
+            "user": userId,
             "name": name,
             "username": username,
             "following": following,
@@ -277,6 +279,7 @@ def getUsers(request):
             'users': [
                 {
                     'user_id': user.user.id,
+                    'user_uuid': str(user.uuid),
                     'username': user.username,
                     'name': user.name,
                     'picture': user.get_picture_url(),
@@ -397,6 +400,7 @@ def profilePage2(request):
 
         return JsonResponse({
             'success': True,
+            'user': request.user.id,
             'name': custom_user.name,
             'username': custom_user.username,
             'profilePicture': custom_user.get_picture_url(),
@@ -411,7 +415,20 @@ def profilePage2(request):
 
     except CustomUser.DoesNotExist:
         custom_user = CustomUser.objects.create(user=request.user, username=request.user.username)
-        return JsonResponse({'success': True, 'username': custom_user.username}, status=200) # Simple return
+        return JsonResponse({
+            'success': True,
+            'userId': request.user.id,
+            'name': custom_user.name,
+            'username': custom_user.username,
+            'profilePicture': custom_user.get_picture_url(),
+            'join_date': custom_user.join_date.isoformat() if custom_user.join_date else None,
+            'following': following_list,
+            'available_sports': available_sports,
+            'followingCount': len(following_list),
+            'commentCount': Comment.objects.filter(user=request.user).count(),
+            'eventCount': Event.objects.filter(creator=request.user).count(),
+            'recentActivity': recent_activity
+        }, status=200)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
