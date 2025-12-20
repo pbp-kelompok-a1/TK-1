@@ -16,10 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from news.views import create_news_flutter
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    path('create-flutter/', create_news_flutter, name='create_news_flutter'),
     path('admin/', admin.site.urls),
     path('auth/', include('authentication.urls')),
     path('following/', include('following.urls')), # abi/fuun
