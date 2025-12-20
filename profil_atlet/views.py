@@ -231,22 +231,26 @@ def delete_medali(request, medal_pk):
 def show_json_detail_atlet(request, pk):
     atlet = get_object_or_404(Atlet, pk=pk)
     
-    # ambil data medali terkait
     medali_data = []
     for m in atlet.medali.all():
         medali_data.append({
             'medal_type': m.medal_type,
             'event': m.event,
-            'medal_date': m.medal_date
+            'medal_date': str(m.medal_date) 
         })
 
     data = {
         'pk': atlet.pk,
         'name': atlet.name,
+        'short_name': atlet.short_name,
         'country': atlet.country,
+        'nationality': atlet.nationality, 
         'discipline': atlet.discipline.name if atlet.discipline else "General",
+        'gender': atlet.gender,           
         'birth_date': str(atlet.birth_date) if atlet.birth_date else None,
-        'medali_list': medali_data, # list medali dikirim disini
+        'birth_place': atlet.birth_place, 
+        'birth_country': atlet.birth_country,
+        'medali_list': medali_data,
     }
     return JsonResponse(data)
 
@@ -283,15 +287,17 @@ def create_atlet_flutter(request):
 
             new_atlet = Atlet.objects.create(
                 name=data.get('name'),
+                short_name=data.get('short_name'),
                 country=data.get('country'),
+                nationality=data.get('nationality') or data.get('country'), 
                 discipline=cabor_obj,
+                gender=data.get('gender'),       
+                birth_date=data.get('birth_date') if data.get('birth_date') else None,
+                birth_place=data.get('birth_place'),
+                birth_country=data.get('birth_country'),
                 is_visible=True, 
             )
             
-            new_atlet.save()
-
-            return JsonResponse({"status": "success", "message": "Berhasil buat atlet baru!"}, status=200)
+            return JsonResponse({"status": "success"}, status=200)
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
-            
-    return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
