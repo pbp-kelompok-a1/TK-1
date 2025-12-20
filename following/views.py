@@ -22,8 +22,8 @@ from profil_atlet.models import Atlet
 
 # Create your views here.
 def createSportOnStart():
-    for profile_atlet in Atlet.objects.all():
-        discipline = profile_atlet.discipline
+    for atlet in Atlet.objects.all():
+        discipline = atlet.discipline
         if not CabangOlahraga.objects.filter(name=discipline).exists():
             CabangOlahraga.objects.create(name=discipline)
 
