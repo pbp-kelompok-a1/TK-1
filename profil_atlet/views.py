@@ -124,7 +124,7 @@ def show_json_atlet(request):
         data.append({
             'pk': atlet.pk,
             'name': atlet.name,
-            'short_name': atlet.short_name,
+            'short_name': atlet.short_name or "-", 
             'discipline': nama_discipline,
             'country': atlet.country,
             'is_visible': atlet.is_visible,
@@ -132,8 +132,13 @@ def show_json_atlet(request):
             'silver_count': atlet.silver_count,
             'bronze_count': atlet.bronze_count,
             'total_medals': atlet.total_medals,
+            # Tambahan fields biar form Flutter gak kosong
+            'gender': atlet.gender,
+            'birth_date': str(atlet.birth_date) if atlet.birth_date else "",
+            'birth_place': atlet.birth_place,
+            'birth_country': atlet.birth_country,
+            'nationality': atlet.nationality,
         })
-
     return JsonResponse(data, safe=False)
 
 @csrf_exempt
@@ -229,6 +234,9 @@ def delete_medali(request, medal_pk):
     return render(request, 'profil_atlet/confirm_delete.html', context)
 
 def show_json_detail_atlet(request, pk):
+    if not request.user.is_authenticated:
+        return JsonResponse({"status": "error", "message": "Login required"}, status=401)
+    
     atlet = get_object_or_404(Atlet, pk=pk)
     
     # ambil data medali terkait
@@ -244,61 +252,91 @@ def show_json_detail_atlet(request, pk):
     data = {
         'pk': atlet.pk,
         'name': atlet.name,
+        'short_name': atlet.short_name or "-",
         'country': atlet.country,
         'discipline': atlet.discipline.name if atlet.discipline else "General",
         'birth_date': str(atlet.birth_date) if atlet.birth_date else None,
-        'medali_list': medali_data, # list medali dikirim disini
+        'gender': atlet.gender,
+        'nationality': atlet.nationality or "-",
+        'birth_place': atlet.birth_place,
+        'birth_country': atlet.birth_country,
+        'medali_list': medali_data,
     }
     return JsonResponse(data)
 
 @csrf_exempt
 def edit_atlet_flutter(request, pk):
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        return JsonResponse({"status": "error", "message": "Admin only"}, status=403)
+    
     if request.method == 'POST':
         try:
             atlet = Atlet.objects.get(pk=pk)
-            # Ambil data dari body JSON yang dikirim Flutter
             data = json.loads(request.body)
-            
-            # Update data
             atlet.name = data.get('name', atlet.name)
+            atlet.short_name = data.get('short_name', atlet.short_name)
             atlet.country = data.get('country', atlet.country)
-           
-            atlet.save()
+            atlet.gender = data.get('gender', atlet.gender)
+            atlet.birth_place = data.get('birth_place', atlet.birth_place)
+            atlet.birth_country = data.get('birth_country', atlet.birth_country)
+            atlet.nationality = data.get('nationality', atlet.nationality)
             
-            return JsonResponse({"status": "success", "message": "Berhasil edit!"}, status=200)
-        except Atlet.DoesNotExist:
-            return JsonResponse({"status": "error", "message": "Atlet tidak ditemukan"}, status=404)
+            birth_date = data.get('birth_date')
+            if birth_date and birth_date.strip() != "":
+                atlet.birth_date = birth_date
+
+            discipline_name = data.get('discipline')
+            if discipline_name:
+                cabor_obj, _ = CabangOlahraga.objects.get_or_create(name=discipline_name)
+                atlet.discipline = cabor_obj
+
+            atlet.save()
+            return JsonResponse({"status": "success", "message": "Athlete updated!"}, status=200)
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
-            
     return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
 
 @csrf_exempt
 def create_atlet_flutter(request):
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        return JsonResponse({"status": "error", "message": "Admin only"}, status=403)
+    
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             
             discipline_name = data.get('discipline', 'General')
-            cabor_obj, created = CabangOlahraga.objects.get_or_create(name=discipline_name)
+            cabor_obj, _ = CabangOlahraga.objects.get_or_create(name=discipline_name)
 
+            # Buat atlet dengan data lengkap
             new_atlet = Atlet.objects.create(
                 name=data.get('name'),
+                short_name=data.get('short_name'),
                 country=data.get('country'),
                 discipline=cabor_obj,
+                gender=data.get('gender'),
+                birth_place=data.get('birth_place'),
+                birth_country=data.get('birth_country'),
+                nationality=data.get('nationality'),
                 is_visible=True, 
             )
-            
-            new_atlet.save()
 
-            return JsonResponse({"status": "success", "message": "Berhasil buat atlet baru!"}, status=200)
+            # Handling date
+            birth_date_str = data.get('birth_date')
+            if birth_date_str and birth_date_str.strip() != "":
+                new_atlet.birth_date = birth_date_str
+                new_atlet.save()
+
+            return JsonResponse({"status": "success", "message": "New athlete created successfully!"}, status=200)
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
-            
     return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
 
 @csrf_exempt
 def edit_medali_flutter(request, pk):
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        return JsonResponse({"status": "error", "message": "Admin only"}, status=403)
+    
     if request.method == 'POST':
         try:
             medali = Medali.objects.get(pk=pk)
@@ -320,6 +358,9 @@ def edit_medali_flutter(request, pk):
 
 @csrf_exempt
 def delete_medali_flutter(request, pk):
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        return JsonResponse({"status": "error", "message": "Admin only"}, status=403)
+    
     if request.method == "POST":
         try:
             medali = Medali.objects.get(pk=pk)
@@ -327,4 +368,26 @@ def delete_medali_flutter(request, pk):
             return JsonResponse({"status": "success", "message": "Medal deleted"}, status=200)
         except Medali.DoesNotExist:
             return JsonResponse({"status": "error", "message": "Medal not found"}, status=404)
+    return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
+
+@csrf_exempt
+def add_medali_flutter(request, atlet_pk):
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        return JsonResponse({"status": "error", "message": "Admin only"}, status=403)
+    
+    if request.method == 'POST':
+        try:
+            atlet = Atlet.objects.get(pk=atlet_pk)
+            data = json.loads(request.body)
+            
+            # Ambil data medali, pastikan medal_type sesuai (Gold Medal, Silver Medal, Bronze Medal)
+            Medali.objects.create(
+                atlet=atlet,
+                medal_type=data.get('medal_type'), # User harus input lengkap atau pake dropdown di Flutter
+                event=data.get('event'),
+                medal_date=data.get('medal_date') 
+            )
+            return JsonResponse({"status": "success", "message": "Medal added!"}, status=201)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
     return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
