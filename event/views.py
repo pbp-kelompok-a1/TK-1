@@ -121,13 +121,18 @@ def show_json(request):
     response_data = []
 
     for event in data:
+        creator_info = {
+            "id": event.creator.id if event.creator else 0,
+            "username": event.creator.username if event.creator else "Anonymous"
+        }
+        
         response_data.append({
             "id": str(event.id),
             "title": event.title,
             "description": event.description,
             "sport_branch": event.sport_branch,
-            "location": event.location,
-            "picture_url": event.picture_url,
+            "location": event.location if event.location else "",
+            "picture_url": event.picture_url if event.picture_url else "",
             "start_time": event.start_time.isoformat(),
             "end_time": event.end_time.isoformat() if event.end_time else None,
             "event_type": event.event_type,
