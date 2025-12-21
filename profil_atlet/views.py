@@ -10,6 +10,7 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 from django.urls import reverse
+from following.models import CabangOlahraga
 
 # fungsi cek Admin 
 # utk jadi Admin harus dipastikan punya status 'is_superuser' 
@@ -155,7 +156,7 @@ def create_atlet_ajax(request):
 
 @csrf_exempt 
 def delete_atlet_ajax(request, pk):
-    if request.method == "DELETE":
+    if request.method == "POST" or request.method == "DELETE":
         try:
             atlet = get_object_or_404(Atlet, pk=pk)
             atlet.delete()
@@ -234,6 +235,7 @@ def show_json_detail_atlet(request, pk):
     medali_data = []
     for m in atlet.medali.all():
         medali_data.append({
+            'pk': m.pk,
             'medal_type': m.medal_type,
             'event': m.event,
             'medal_date': m.medal_date
@@ -248,3 +250,81 @@ def show_json_detail_atlet(request, pk):
         'medali_list': medali_data, # list medali dikirim disini
     }
     return JsonResponse(data)
+
+@csrf_exempt
+def edit_atlet_flutter(request, pk):
+    if request.method == 'POST':
+        try:
+            atlet = Atlet.objects.get(pk=pk)
+            # Ambil data dari body JSON yang dikirim Flutter
+            data = json.loads(request.body)
+            
+            # Update data
+            atlet.name = data.get('name', atlet.name)
+            atlet.country = data.get('country', atlet.country)
+           
+            atlet.save()
+            
+            return JsonResponse({"status": "success", "message": "Berhasil edit!"}, status=200)
+        except Atlet.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Atlet tidak ditemukan"}, status=404)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+            
+    return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
+
+@csrf_exempt
+def create_atlet_flutter(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            discipline_name = data.get('discipline', 'General')
+            cabor_obj, created = CabangOlahraga.objects.get_or_create(name=discipline_name)
+
+            new_atlet = Atlet.objects.create(
+                name=data.get('name'),
+                country=data.get('country'),
+                discipline=cabor_obj,
+                is_visible=True, 
+            )
+            
+            new_atlet.save()
+
+            return JsonResponse({"status": "success", "message": "Berhasil buat atlet baru!"}, status=200)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+            
+    return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
+
+@csrf_exempt
+def edit_medali_flutter(request, pk):
+    if request.method == 'POST':
+        try:
+            medali = Medali.objects.get(pk=pk)
+            data = json.loads(request.body)
+            
+            # Update field medali
+            medali.medal_type = data.get('medal_type', medali.medal_type)
+            medali.event = data.get('event', medali.event)
+            medali.medal_date = data.get('medal_date', medali.medal_date)
+            
+            medali.save()
+            return JsonResponse({"status": "success", "message": "Medal updated!"}, status=200)
+        except Medali.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Medal not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+            
+    return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
+
+@csrf_exempt
+def delete_medali_flutter(request, pk):
+    if request.method == "POST":
+        try:
+            medali = Medali.objects.get(pk=pk)
+            medali.delete()
+            return JsonResponse({"status": "success", "message": "Medal deleted"}, status=200)
+        except Medali.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Medal not found"}, status=404)
+    return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
