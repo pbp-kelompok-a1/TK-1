@@ -140,7 +140,8 @@ def show_json(request):
                 "id": event.creator.id if event.creator else 0,
                 "username": event.creator.username if event.creator else "Unknown"
             },
-            "cabangOlahraga": event.cabangOlahraga.id if event.cabangOlahraga else None,
+            "cabangOlahraga": str(event.cabangOlahraga.id) if event.cabangOlahraga else None,
+            "cabangOlahragaName": event.cabangOlahraga.name if event.cabangOlahraga else "General",
             "created_at": event.created_at.isoformat(),
         })
 
