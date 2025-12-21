@@ -26,4 +26,5 @@ urlpatterns = [
     
     path('edit-medali-flutter/<int:pk>/', views.edit_medali_flutter, name='edit_medali_flutter'),
     path('delete-medali-flutter/<int:pk>/', views.delete_medali_flutter, name='delete_medali_flutter'),
+    path('add-medali-flutter/<int:atlet_pk>/', views.add_medali_flutter, name='add_medali_flutter'),
 ]
