@@ -235,6 +235,7 @@ def show_json_detail_atlet(request, pk):
     medali_data = []
     for m in atlet.medali.all():
         medali_data.append({
+            'pk': m.pk,
             'medal_type': m.medal_type,
             'event': m.event,
             'medal_date': m.medal_date
@@ -294,4 +295,36 @@ def create_atlet_flutter(request):
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
             
+    return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
+
+@csrf_exempt
+def edit_medali_flutter(request, pk):
+    if request.method == 'POST':
+        try:
+            medali = Medali.objects.get(pk=pk)
+            data = json.loads(request.body)
+            
+            # Update field medali
+            medali.medal_type = data.get('medal_type', medali.medal_type)
+            medali.event = data.get('event', medali.event)
+            medali.medal_date = data.get('medal_date', medali.medal_date)
+            
+            medali.save()
+            return JsonResponse({"status": "success", "message": "Medal updated!"}, status=200)
+        except Medali.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Medal not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+            
+    return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
+
+@csrf_exempt
+def delete_medali_flutter(request, pk):
+    if request.method == "POST":
+        try:
+            medali = Medali.objects.get(pk=pk)
+            medali.delete()
+            return JsonResponse({"status": "success", "message": "Medal deleted"}, status=200)
+        except Medali.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Medal not found"}, status=404)
     return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
