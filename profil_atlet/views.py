@@ -124,16 +124,20 @@ def show_json_atlet(request):
         data.append({
             'pk': atlet.pk,
             'name': atlet.name,
-            'short_name': atlet.short_name,
+            'short_name': atlet.short_name or "-", 
             'discipline': nama_discipline,
             'country': atlet.country,
+            'gender': atlet.gender or "-",         
+            'birth_date': str(atlet.birth_date) if atlet.birth_date else "", 
+            'birth_place': atlet.birth_place or "-", 
+            'birth_country': atlet.birth_country or "-", 
+            'nationality': atlet.nationality or "-", 
             'is_visible': atlet.is_visible,
             'gold_count': atlet.gold_count,
             'silver_count': atlet.silver_count,
             'bronze_count': atlet.bronze_count,
             'total_medals': atlet.total_medals,
         })
-
     return JsonResponse(data, safe=False)
 
 @csrf_exempt
@@ -260,18 +264,24 @@ def edit_atlet_flutter(request, pk):
     if request.method == 'POST':
         try:
             atlet = Atlet.objects.get(pk=pk)
-            # Ambil data dari body JSON yang dikirim Flutter
             data = json.loads(request.body)
             
-            # Update data
             atlet.name = data.get('name', atlet.name)
+            atlet.short_name = data.get('short_name', atlet.short_name)
             atlet.country = data.get('country', atlet.country)
-           
+            atlet.gender = data.get('gender', atlet.gender)
+            atlet.birth_place = data.get('birth_place', atlet.birth_place)
+            atlet.birth_country = data.get('birth_country', atlet.birth_country)
+            atlet.nationality = data.get('nationality', atlet.nationality)
+            atlet.birth_date = data.get('birth_date') if data.get('birth_date') != "" else atlet.birth_date
+
+            discipline_name = data.get('discipline')
+            if discipline_name:
+                cabor_obj, _ = CabangOlahraga.objects.get_or_create(name=discipline_name)
+                atlet.discipline = cabor_obj
+
             atlet.save()
-            
-            return JsonResponse({"status": "success", "message": "Berhasil edit!"}, status=200)
-        except Atlet.DoesNotExist:
-            return JsonResponse({"status": "error", "message": "Atlet tidak ditemukan"}, status=404)
+            return JsonResponse({"status": "success", "message": "Successfully updated athlete data!"}, status=200)
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
             
