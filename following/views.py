@@ -192,6 +192,7 @@ def profilePage(request):
             "form": form,
             "profile_form": profile_form,
             "profilePicture": profilePicture,
+            "user": userId,
             "name": name,
             "username": username,
             "following": following,

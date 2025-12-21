@@ -81,6 +81,10 @@ def berita_delete(request, pk):
 
 def berita_json_list(request):
     berita = Berita.objects.all().order_by('-id')
+    try:
+        berita = getListOfNews(request.user)
+    except: 
+        pass
 
     data = []
     for item in berita:

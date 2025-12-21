@@ -118,6 +118,10 @@ def event_edit(request, event_id):
 
 def show_json(request):
     data = Event.objects.all()
+    try:
+        data = getListOfEvents(request.user)
+    except:
+        pass
     response_data = []
 
     for event in data:
