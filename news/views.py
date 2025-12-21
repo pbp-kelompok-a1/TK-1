@@ -93,7 +93,7 @@ def berita_json_list(request):
             "thumbnail": item.thumbnail,
             "author": item.author.username,
             "created_at" : item.created_at.isoformat(),
-            "cabangOlahraga": item.cabangOlahraga.namaCabang if item.cabangOlahraga else None,
+            "cabangOlahraga": item.cabangOlahraga.name if item.cabangOlahraga else None,
         })
 
     return JsonResponse(data, safe=False)
@@ -110,7 +110,7 @@ def berita_json_detail(request, pk):
         "thumbnail": item.thumbnail,
         "author": item.author.username,
         "created_at" : item.created_at.isoformat(),
-        "cabangOlahraga": item.cabangOlahraga.namaCabang if item.cabangOlahraga else None,
+        "cabangOlahraga": item.cabangOlahraga.name if item.cabangOlahraga else None,
     }
 
     return JsonResponse(data)
