@@ -124,21 +124,21 @@ def show_json_atlet(request):
         data.append({
             'pk': atlet.pk,
             'name': atlet.name,
-            'short_name': atlet.short_name,
+            'short_name': atlet.short_name or "-", 
             'discipline': nama_discipline,
             'country': atlet.country,
-            'gender': atlet.gender,
-            'birth_date': str(atlet.birth_date) if atlet.birth_date else "",
-            'birth_place': atlet.birth_place,
-            'birth_country': atlet.birth_country,
-            'nationality': atlet.nationality,
             'is_visible': atlet.is_visible,
             'gold_count': atlet.gold_count,
             'silver_count': atlet.silver_count,
             'bronze_count': atlet.bronze_count,
             'total_medals': atlet.total_medals,
+            # Tambahan fields biar form Flutter gak kosong
+            'gender': atlet.gender,
+            'birth_date': str(atlet.birth_date) if atlet.birth_date else "",
+            'birth_place': atlet.birth_place,
+            'birth_country': atlet.birth_country,
+            'nationality': atlet.nationality,
         })
-
     return JsonResponse(data, safe=False)
 
 @csrf_exempt
@@ -275,17 +275,15 @@ def edit_atlet_flutter(request, pk):
             atlet.birth_place = data.get('birth_place', atlet.birth_place)
             atlet.birth_country = data.get('birth_country', atlet.birth_country)
             atlet.nationality = data.get('nationality', atlet.nationality)
-            atlet.birth_date = data.get('birth_date', atlet.birth_date)
-
+            
+            # Logic discipline diperbaiki biar gak error
             discipline_name = data.get('discipline')
             if discipline_name:
-                # Cari atau buat cabor baru berdasarkan nama yang diinput
-                from following.models import CabangOlahraga
                 cabor_obj, _ = CabangOlahraga.objects.get_or_create(name=discipline_name)
                 atlet.discipline = cabor_obj
 
             atlet.save()
-            return JsonResponse({"status": "success", "message": "Successfully edited!"}, status=200)
+            return JsonResponse({"status": "success", "message": "Athlete updated successfully"}, status=200)
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
             
