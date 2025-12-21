@@ -124,7 +124,7 @@ def show_json_atlet(request):
         data.append({
             'pk': atlet.pk,
             'name': atlet.name,
-            'short_name': atlet.short_name,
+            'short_name': atlet.short_name or "-", 
             'discipline': nama_discipline,
             'country': atlet.country,
             'is_visible': atlet.is_visible,
@@ -132,8 +132,13 @@ def show_json_atlet(request):
             'silver_count': atlet.silver_count,
             'bronze_count': atlet.bronze_count,
             'total_medals': atlet.total_medals,
+            # Tambahan fields biar form Flutter gak kosong
+            'gender': atlet.gender,
+            'birth_date': str(atlet.birth_date) if atlet.birth_date else "",
+            'birth_place': atlet.birth_place,
+            'birth_country': atlet.birth_country,
+            'nationality': atlet.nationality,
         })
-
     return JsonResponse(data, safe=False)
 
 @csrf_exempt
@@ -244,10 +249,15 @@ def show_json_detail_atlet(request, pk):
     data = {
         'pk': atlet.pk,
         'name': atlet.name,
+        'short_name': atlet.short_name or "-",
         'country': atlet.country,
         'discipline': atlet.discipline.name if atlet.discipline else "General",
         'birth_date': str(atlet.birth_date) if atlet.birth_date else None,
-        'medali_list': medali_data, # list medali dikirim disini
+        'gender': atlet.gender,
+        'nationality': atlet.nationality or "-",
+        'birth_place': atlet.birth_place,
+        'birth_country': atlet.birth_country,
+        'medali_list': medali_data,
     }
     return JsonResponse(data)
 
@@ -256,18 +266,24 @@ def edit_atlet_flutter(request, pk):
     if request.method == 'POST':
         try:
             atlet = Atlet.objects.get(pk=pk)
-            # Ambil data dari body JSON yang dikirim Flutter
             data = json.loads(request.body)
             
-            # Update data
             atlet.name = data.get('name', atlet.name)
+            atlet.short_name = data.get('short_name', atlet.short_name)
             atlet.country = data.get('country', atlet.country)
-           
-            atlet.save()
+            atlet.gender = data.get('gender', atlet.gender)
+            atlet.birth_place = data.get('birth_place', atlet.birth_place)
+            atlet.birth_country = data.get('birth_country', atlet.birth_country)
+            atlet.nationality = data.get('nationality', atlet.nationality)
             
-            return JsonResponse({"status": "success", "message": "Berhasil edit!"}, status=200)
-        except Atlet.DoesNotExist:
-            return JsonResponse({"status": "error", "message": "Atlet tidak ditemukan"}, status=404)
+            # Logic discipline diperbaiki biar gak error
+            discipline_name = data.get('discipline')
+            if discipline_name:
+                cabor_obj, _ = CabangOlahraga.objects.get_or_create(name=discipline_name)
+                atlet.discipline = cabor_obj
+
+            atlet.save()
+            return JsonResponse({"status": "success", "message": "Athlete updated successfully"}, status=200)
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
             
@@ -280,21 +296,30 @@ def create_atlet_flutter(request):
             data = json.loads(request.body)
             
             discipline_name = data.get('discipline', 'General')
-            cabor_obj, created = CabangOlahraga.objects.get_or_create(name=discipline_name)
+            cabor_obj, _ = CabangOlahraga.objects.get_or_create(name=discipline_name)
 
+            # Buat atlet dengan data lengkap
             new_atlet = Atlet.objects.create(
                 name=data.get('name'),
+                short_name=data.get('short_name'),
                 country=data.get('country'),
                 discipline=cabor_obj,
+                gender=data.get('gender'),
+                birth_place=data.get('birth_place'),
+                birth_country=data.get('birth_country'),
+                nationality=data.get('nationality'),
                 is_visible=True, 
             )
-            
-            new_atlet.save()
 
-            return JsonResponse({"status": "success", "message": "Berhasil buat atlet baru!"}, status=200)
+            # Handling date
+            birth_date_str = data.get('birth_date')
+            if birth_date_str and birth_date_str.strip() != "":
+                new_atlet.birth_date = birth_date_str
+                new_atlet.save()
+
+            return JsonResponse({"status": "success", "message": "New athlete created successfully!"}, status=200)
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
-            
     return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
 
 @csrf_exempt
@@ -327,4 +352,24 @@ def delete_medali_flutter(request, pk):
             return JsonResponse({"status": "success", "message": "Medal deleted"}, status=200)
         except Medali.DoesNotExist:
             return JsonResponse({"status": "error", "message": "Medal not found"}, status=404)
+    return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
+
+@csrf_exempt
+def add_medali_flutter(request, atlet_pk):
+    if request.method == 'POST':
+        try:
+            atlet = Atlet.objects.get(pk=atlet_pk)
+            data = json.loads(request.body)
+            
+            # Buat medali baru yg terhubung ke atlet ini
+            Medali.objects.create(
+                atlet=atlet,
+                medal_type=data.get('medal_type'),
+                event=data.get('event'),
+                medal_date=data.get('medal_date', '2024-01-01') # Default date jika kosong
+            )
+            return JsonResponse({"status": "success", "message": "Medal created!"}, status=201)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+            
     return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)

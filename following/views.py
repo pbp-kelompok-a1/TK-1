@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.files.base import ContentFile
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.http import JsonResponse
 import base64
 import uuid
 
@@ -226,6 +228,8 @@ def getJSONFollowing(request):
         })
     return JsonResponse({'followings': data}, status=200)
 
+
+@ensure_csrf_cookie
 def getJSONCabangOlahraga(request):
     cabangOlahraga = CabangOlahraga.objects.all()
     data = []

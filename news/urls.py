@@ -15,4 +15,5 @@ urlpatterns = [
     path('proxy-image/', views.proxy_image, name='proxy_image'),
     path('edit-flutter/<int:pk>/', views.edit_flutter, name='edit_flutter'),
     path('delete-flutter/<int:pk>/', views.delete_flutter, name='delete_flutter'),
+    path('get-user-status/', views.get_user_status, name='get_user_status'),
 ]
