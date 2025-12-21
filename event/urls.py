@@ -11,4 +11,6 @@ urlpatterns = [
     path('<uuid:event_id>/edit/', views.event_edit, name='event_edit'),
     path('json/', views.show_json, name='show_json'),
     path('create-flutter/', views.create_event_flutter, name='create_event_flutter'),
+    path('<uuid:event_id>/delete-flutter/', views.event_delete_flutter, name='event_delete_flutter'),
+    path('<uuid:event_id>/edit-flutter/', views.edit_event_flutter, name='event_edit_flutter'),
 ]
