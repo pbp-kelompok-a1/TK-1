@@ -247,7 +247,11 @@ def show_json_detail_atlet(request, pk):
         'country': atlet.country,
         'discipline': atlet.discipline.name if atlet.discipline else "General",
         'birth_date': str(atlet.birth_date) if atlet.birth_date else None,
-        'medali_list': medali_data, # list medali dikirim disini
+        'gender': atlet.gender,
+        'nationality': atlet.nationality or atlet.country,
+        'birth_place': atlet.birth_place,
+        'birth_country': atlet.birth_country,
+        'medali_list': medali_data,
     }
     return JsonResponse(data)
 
@@ -327,4 +331,24 @@ def delete_medali_flutter(request, pk):
             return JsonResponse({"status": "success", "message": "Medal deleted"}, status=200)
         except Medali.DoesNotExist:
             return JsonResponse({"status": "error", "message": "Medal not found"}, status=404)
+    return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
+
+@csrf_exempt
+def add_medali_flutter(request, atlet_pk):
+    if request.method == 'POST':
+        try:
+            atlet = Atlet.objects.get(pk=atlet_pk)
+            data = json.loads(request.body)
+            
+            # Buat medali baru yg terhubung ke atlet ini
+            Medali.objects.create(
+                atlet=atlet,
+                medal_type=data.get('medal_type'),
+                event=data.get('event'),
+                medal_date=data.get('medal_date', '2024-01-01') # Default date jika kosong
+            )
+            return JsonResponse({"status": "success", "message": "Medal created!"}, status=201)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+            
     return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
