@@ -15,6 +15,7 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User
 
 def berita_list(request):
+    createSportOnStart()
     berita = Berita.objects.all().order_by('-id')
     if request.user != None:
         try:
@@ -92,7 +93,7 @@ def berita_json_list(request):
             "thumbnail": item.thumbnail,
             "author": item.author.username,
             "created_at" : item.created_at.isoformat(),
-            "cabangOlahraga": item.cabangOlahraga.name if item.cabangOlahraga else None,
+            "cabangOlahraga": item.cabangOlahraga.namaCabang if item.cabangOlahraga else None,
         })
 
     return JsonResponse(data, safe=False)
@@ -151,11 +152,6 @@ def create_news_flutter(request):
         if request.user.is_authenticated:
             # Kalau sudah login, pakai user yang login
             user = request.user
-        else:
-            # Kalau BELUM login, kita pinjam akun pertama di database (Admin)
-            # Ini cuma buat ngetes biar ga error 500
-            user = User.objects.first() 
-        # ======================================
 
         title = strip_tags(data.get("title", ""))
         content = strip_tags(data.get("content", ""))
@@ -167,7 +163,7 @@ def create_news_flutter(request):
             content=content,
             category=category,
             thumbnail=thumbnail,
-            author=user # Sekarang user pasti terisi (entah login atau pinjam admin)
+            author=user
         )
         new_news.save()
 
@@ -199,3 +195,17 @@ def edit_flutter(request, pk):
         return JsonResponse({"status": "success"})
 
     return JsonResponse({"status": "error"}, status=405)
+
+def get_user_status(request):
+    if request.user.is_authenticated:
+        return JsonResponse({
+            "status": True,
+            "username": request.user.username,
+            "is_staff": request.user.is_staff,
+        })
+    else:
+        return JsonResponse({
+            "status": False,
+            "username": "Guest",
+            "is_staff": False,
+        })
